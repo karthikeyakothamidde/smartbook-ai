@@ -16,7 +16,8 @@ import {
   TrendingUp,
   X,
   Sliders,
-  Briefcase
+  Briefcase,
+  Sparkles
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -268,7 +269,7 @@ export const EmployeeDashboard: React.FC = () => {
 
           <div className="p-4 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200/50 dark:border-white/5 mb-8 flex items-center gap-3">
             <div className="h-10 w-10 bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 font-bold rounded-xl flex items-center justify-center uppercase">
-              {user?.name.charAt(0)}
+              {(user?.name || '').charAt(0)}
             </div>
             <div>
               <h4 className="font-semibold text-sm truncate text-slate-800 dark:text-white">{user?.name}</h4>
@@ -360,7 +361,7 @@ export const EmployeeDashboard: React.FC = () => {
             {/* Dashboard Title & Stats */}
             <div>
               <h1 className="font-display text-2xl md:text-4xl font-extrabold text-slate-800 dark:text-white">
-                Welcome, {user?.name.split(' ')[0]} 🚀
+                Welcome, {(user?.name || 'Staff').split(' ')[0]} 🚀
               </h1>
               <p className="text-slate-500 dark:text-slate-400 mt-1">
                 Manage your shifts, Availability patterns, and review upcoming appointments.
