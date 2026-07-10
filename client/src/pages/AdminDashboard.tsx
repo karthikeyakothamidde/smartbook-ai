@@ -37,6 +37,7 @@ export const AdminDashboard: React.FC = () => {
   // Data States
   const [appointments, setAppointments] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
+  const [leaves, setLeaves] = useState<any[]>([]);
   const [services, setServices] = useState<any[]>([]);
   const [waitlist, setWaitlist] = useState<any[]>([]);
   const [analytics, setAnalytics] = useState<any>(null);
@@ -133,6 +134,15 @@ export const AdminDashboard: React.FC = () => {
       if (anaRes.ok) {
         const data = await anaRes.json();
         setAnalytics(data);
+      }
+
+      // 6. Fetch leaves
+      const leavesRes = await fetch(`${API_URL}/employees/leaves`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (leavesRes.ok) {
+        const data = await leavesRes.json();
+        setLeaves(data);
       }
     } catch (err) {
       console.error("Error loading admin dashboard details:", err);
@@ -283,6 +293,30 @@ export const AdminDashboard: React.FC = () => {
       } else {
         const errorData = await res.json();
         showToast(errorData.message || "Failed to delete employee.");
+      }
+    } catch (err) {
+      showToast("Error connecting to server.");
+    }
+  };
+
+  // Update Leave Request Status Handler (Accept / Decline)
+  const handleUpdateLeaveStatus = async (id: string, status: 'APPROVED' | 'REJECTED') => {
+    try {
+      const res = await fetch(`${API_URL}/employees/leaves/${id}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ status })
+      });
+
+      if (res.ok) {
+        showToast(`Leave request ${status.toLowerCase()} successfully!`);
+        fetchAdminData();
+      } else {
+        const errorData = await res.json();
+        showToast(errorData.message || "Failed to update leave request.");
       }
     } catch (err) {
       showToast("Error connecting to server.");
@@ -875,6 +909,73 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                     ))}
                   </div>
+                </div>
+
+                {/* Staff Leave Requests Section */}
+                <div className="space-y-4 mt-8">
+                  <h3 className="font-display font-bold text-lg text-slate-800 dark:text-white">Staff Leave Requests</h3>
+                  
+                  {leaves.length === 0 ? (
+                    <div className="p-8 text-center rounded-3xl bg-white dark:bg-linear-card border border-slate-200/50 dark:border-white/5 text-slate-400 shadow-premium">
+                      No leave requests logged.
+                    </div>
+                  ) : (
+                    <div className="p-6 rounded-3xl bg-white dark:bg-linear-card border border-slate-200/50 dark:border-white/5 shadow-premium overflow-x-auto">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="border-b border-slate-100 dark:border-white/5 text-xs text-slate-400 font-bold uppercase">
+                            <th className="pb-3">Staff Member</th>
+                            <th className="pb-3">Requested Date</th>
+                            <th className="pb-3">Reason</th>
+                            <th className="pb-3 text-center">Status</th>
+                            <th className="pb-3 text-right">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="text-sm divide-y divide-slate-100 dark:divide-white/5">
+                          {leaves.map(l => (
+                            <tr key={l.id} className="text-slate-700 dark:text-slate-300">
+                              <td className="py-3.5 font-semibold text-slate-900 dark:text-white">
+                                {l.employee?.user?.name || 'Unknown Staff'}
+                                <span className="text-[10px] text-slate-400 block mt-0.5">{l.employee?.user?.email}</span>
+                              </td>
+                              <td className="py-3.5 font-medium">
+                                {new Date(l.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                              </td>
+                              <td className="py-3.5 italic text-slate-500 max-w-xs truncate" title={l.reason}>
+                                "{l.reason || 'No reason provided'}"
+                              </td>
+                              <td className="py-3.5 text-center">
+                                <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded ${
+                                  l.status === 'APPROVED' ? 'bg-emerald-500/10 text-emerald-500' :
+                                  l.status === 'REJECTED' ? 'bg-red-500/10 text-red-500' : 'bg-amber-500/10 text-amber-500'
+                                }`}>
+                                  {l.status || 'PENDING'}
+                                </span>
+                              </td>
+                              <td className="py-3.5 text-right space-x-2">
+                                {l.status === 'PENDING' && (
+                                  <>
+                                    <button
+                                      onClick={() => handleUpdateLeaveStatus(l.id, 'APPROVED')}
+                                      className="px-3 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs transition-all shadow-sm"
+                                    >
+                                      Accept
+                                    </button>
+                                    <button
+                                      onClick={() => handleUpdateLeaveStatus(l.id, 'REJECTED')}
+                                      className="px-3 py-1 rounded-lg bg-red-500 hover:bg-red-600 text-white font-bold text-xs transition-all shadow-sm"
+                                    >
+                                      Decline
+                                    </button>
+                                  </>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </div>
 
               </div>

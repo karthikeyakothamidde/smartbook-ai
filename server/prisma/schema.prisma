@@ -56,6 +56,7 @@ model Leave {
   employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   date       String   // Format: "YYYY-MM-DD"
   reason     String?
+  status     String   @default("PENDING") // "PENDING", "APPROVED", "REJECTED"
 }
 
 model Service {

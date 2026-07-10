@@ -192,4 +192,45 @@ router.delete('/:id', authenticateToken, requireRole(['ADMIN']), async (req: Aut
   }
 });
 
+// Admin: Get all leave requests
+router.get('/leaves', authenticateToken, requireRole(['ADMIN']), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const leaves = await prisma.leave.findMany({
+      include: {
+        employee: {
+          include: {
+            user: { select: { name: true, email: true } }
+          }
+        }
+      },
+      orderBy: { date: 'asc' }
+    });
+    return res.json(leaves);
+  } catch (error) {
+    console.error("Fetch leaves error:", error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Admin: Approve or Reject leave request
+router.put('/leaves/:id/status', authenticateToken, requireRole(['ADMIN']), async (req: AuthenticatedRequest, res: Response) => {
+  const { id } = req.params;
+  const { status } = req.body; // "APPROVED" or "REJECTED"
+
+  if (!['APPROVED', 'REJECTED'].includes(status)) {
+    return res.status(400).json({ message: 'Invalid status' });
+  }
+
+  try {
+    const updated = await prisma.leave.update({
+      where: { id },
+      data: { status }
+    });
+    return res.json(updated);
+  } catch (error) {
+    console.error("Update leave status error:", error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 export default router;

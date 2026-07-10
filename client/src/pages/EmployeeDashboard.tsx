@@ -589,8 +589,11 @@ export const EmployeeDashboard: React.FC = () => {
                             <span className="font-bold block text-slate-800 dark:text-white">{l.date}</span>
                             <span className="text-slate-400 mt-1 block">Reason: {l.reason || 'None provided'}</span>
                           </div>
-                          <span className="px-2 py-0.5 font-bold rounded bg-amber-500/10 text-amber-500">
-                            APPROVED
+                          <span className={`px-2 py-0.5 font-bold rounded ${
+                            l.status === 'APPROVED' ? 'bg-emerald-500/10 text-emerald-500' :
+                            l.status === 'REJECTED' ? 'bg-red-500/10 text-red-500' : 'bg-amber-500/10 text-amber-500'
+                          }`}>
+                            {l.status || 'PENDING'}
                           </span>
                         </div>
                       ))
