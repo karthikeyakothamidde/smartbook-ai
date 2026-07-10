@@ -164,6 +164,28 @@ router.post('/me/leave', authenticateToken, requireRole(['EMPLOYEE']), async (re
   } catch (error) {
     console.error("Record leave error:", error);
     return res.status(500).json({ message: 'Internal server error' });
+// Admin: Delete employee profile and associated user
+router.delete('/:id', authenticateToken, requireRole(['ADMIN']), async (req: AuthenticatedRequest, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const employee = await prisma.employee.findUnique({
+      where: { id }
+    });
+
+    if (!employee) {
+      return res.status(404).json({ message: 'Employee not found' });
+    }
+
+    // Delete User record which cascades down to delete Employee profile, Availability, Leaves, Appointments etc.
+    await prisma.user.delete({
+      where: { id: employee.userId }
+    });
+
+    return res.json({ message: 'Employee deleted successfully' });
+  } catch (error) {
+    console.error("Delete employee error:", error);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 });
 

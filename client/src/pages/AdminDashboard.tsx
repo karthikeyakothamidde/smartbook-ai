@@ -265,6 +265,30 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  // Delete Employee Handler
+  const handleDeleteEmployee = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this employee? This will permanently delete their account and all their scheduled appointments.")) return;
+
+    try {
+      const res = await fetch(`${API_URL}/employees/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (res.ok) {
+        showToast("Employee deleted successfully!");
+        fetchAdminData();
+      } else {
+        const errorData = await res.json();
+        showToast(errorData.message || "Failed to delete employee.");
+      }
+    } catch (err) {
+      showToast("Error connecting to server.");
+    }
+  };
+
   // Update Service Price & Info Handler
   const handleUpdateService = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -835,9 +859,18 @@ export const AdminDashboard: React.FC = () => {
                           <span className="text-slate-400 block mt-1">{emp.email}</span>
                           <span className="text-blue-500 mt-1 block font-medium">Skills: {emp.skills}</span>
                         </div>
-                        <div className="text-right">
-                          <span className="font-bold text-amber-500 text-sm">★ {emp.rating}</span>
-                          <span className="text-slate-400 mt-1 block">{emp.experienceYears} yrs experience</span>
+                        <div className="flex items-center gap-5">
+                          <div className="text-right">
+                            <span className="font-bold text-amber-500 text-sm">★ {emp.rating}</span>
+                            <span className="text-slate-400 mt-1 block">{emp.experienceYears} yrs experience</span>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteEmployee(emp.id)}
+                            className="p-2 text-red-500 hover:bg-red-500/10 dark:hover:bg-red-500/20 rounded-xl transition-all"
+                            title="Delete Employee"
+                          >
+                            <Trash2 className="h-4.5 w-4.5" />
+                          </button>
                         </div>
                       </div>
                     ))}
