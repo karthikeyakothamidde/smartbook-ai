@@ -7,6 +7,7 @@ import { Register } from './pages/Register';
 import { CustomerDashboard } from './pages/CustomerDashboard';
 import { EmployeeDashboard } from './pages/EmployeeDashboard';
 import { AdminDashboard } from './pages/AdminDashboard';
+import { Forgot } from './pages/Forgot';
 
 // Route Guard to verify authentications
 const ProtectedRoute: React.FC<{ children: React.ReactNode; allowedRoles: string[] }> = ({ children, allowedRoles }) => {
@@ -44,6 +45,7 @@ const AppContent: React.FC = () => {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/forgot" element={<Forgot />} />
 
       {/* Protected Customer Dashboard */}
       <Route 

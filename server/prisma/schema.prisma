@@ -24,6 +24,8 @@ model User {
   reviews             Review[]
   employeeProfile     Employee?      @relation("UserEmployeeProfile")
   waitlists           Waitlist[]
+  otp                 String?
+  otpExpires          DateTime?
 }
 
 model Employee {

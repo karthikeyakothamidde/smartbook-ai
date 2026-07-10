@@ -91,12 +91,14 @@ export const EmployeeDashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!token || user?.role !== 'EMPLOYEE') {
+    if (!token) {
       navigate('/login');
       return;
     }
-    fetchEmployeeData();
-  }, [token]);
+    if (user) {
+      fetchEmployeeData();
+    }
+  }, [token, user]);
 
   // Synchronize employee settings when user object completes loading
   useEffect(() => {

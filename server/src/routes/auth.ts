@@ -238,5 +238,91 @@ router.put('/me', authenticateToken, async (req: AuthenticatedRequest, res: Resp
   }
 });
 
+// Forgot Password Request (Generate OTP)
+router.post('/forgot-password', async (req: any, res: Response) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      // Return a standard response for security, but flag that it doesn't exist
+      return res.status(404).json({ message: 'No account found with this email address.' });
+    }
+
+    // Generate 6-digit numeric code
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        otp,
+        otpExpires: expires
+      }
+    });
+
+    console.log(`[PASS RESET OTP FOR ${email}]: ${otp}`);
+
+    return res.json({
+      message: 'A password reset code has been sent to your email.',
+      status: 'success',
+      otp // Return OTP so frontend can show a Mock Inbox Toast
+    });
+  } catch (error: any) {
+    console.error("Forgot password error:", error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Reset Password (Verify OTP and Update Password)
+router.post('/reset-password', async (req: any, res: Response) => {
+  const { email, otp, newPassword } = req.body;
+
+  if (!email || !otp || !newPassword) {
+    return res.status(400).json({ message: 'Email, OTP, and new password are required' });
+  }
+
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user || !user.otp || !user.otpExpires) {
+      return res.status(400).json({ message: 'Invalid or expired OTP code' });
+    }
+
+    // Check if expired
+    if (new Date() > user.otpExpires) {
+      return res.status(400).json({ message: 'OTP code has expired' });
+    }
+
+    // Check if match
+    if (user.otp !== otp) {
+      return res.status(400).json({ message: 'Invalid OTP code' });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password and clear OTP
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        otp: null,
+        otpExpires: null
+      }
+    });
+
+    return res.json({ message: 'Password has been reset successfully. Please log in.' });
+  } catch (error: any) {
+    console.error("Reset password error:", error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 export default router;
 
