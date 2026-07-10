@@ -137,47 +137,7 @@ export const Login: React.FC = () => {
           <p className="text-slate-400 text-sm mt-1">Sign in to manage your appointments</p>
         </div>
 
-        {/* Quick Fill Helpers */}
-        <div className="mb-6">
-          <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2 text-center">
-            Demo Quick Fills
-          </label>
-          <div className="grid grid-cols-3 gap-2">
-            <button 
-              type="button"
-              onClick={() => handleQuickFill('CUSTOMER')}
-              className={`py-2 rounded-xl text-xs font-bold transition-all border ${
-                role === 'CUSTOMER' && email === 'customer@smartbook.ai'
-                  ? 'bg-blue-500 text-slate-950 border-blue-500 shadow-md shadow-blue-500/10' 
-                  : 'bg-white/5 text-slate-300 border-white/5 hover:bg-white/10'
-              }`}
-            >
-              Customer
-            </button>
-            <button 
-              type="button"
-              onClick={() => handleQuickFill('EMPLOYEE')}
-              className={`py-2 rounded-xl text-xs font-bold transition-all border ${
-                role === 'EMPLOYEE' && email === 'sarah@smartbook.ai'
-                  ? 'bg-blue-500 text-slate-950 border-blue-500 shadow-md shadow-blue-500/10' 
-                  : 'bg-white/5 text-slate-300 border-white/5 hover:bg-white/10'
-              }`}
-            >
-              Employee
-            </button>
-            <button 
-              type="button"
-              onClick={() => handleQuickFill('ADMIN')}
-              className={`py-2 rounded-xl text-xs font-bold transition-all border ${
-                role === 'ADMIN' && email === 'admin@smartbook.ai'
-                  ? 'bg-blue-500 text-slate-950 border-blue-500 shadow-md shadow-blue-500/10' 
-                  : 'bg-white/5 text-slate-300 border-white/5 hover:bg-white/10'
-              }`}
-            >
-              Admin
-            </button>
-          </div>
-        </div>
+
 
         {error && (
           <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-start gap-2 text-sm">
