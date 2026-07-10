@@ -34,7 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [token, setToken] = useState<string | null>(localStorage.getItem('smartbook_token'));
   const [loading, setLoading] = useState(true);
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  const API_URL = 'https://smartbook-backend.onrender.com/api' || 'https://smartbook-backend.onrender.com/api';
 
   useEffect(() => {
     const fetchMe = async () => {
