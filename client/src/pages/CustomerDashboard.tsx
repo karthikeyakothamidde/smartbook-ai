@@ -79,7 +79,7 @@ export const CustomerDashboard: React.FC = () => {
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
 
-  const API_URL = 'http://localhost:5000/api';
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   const showToast = (msg: string) => {
     setToasts(prev => [...prev, msg]);
