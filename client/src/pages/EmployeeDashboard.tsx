@@ -547,7 +547,7 @@ export const EmployeeDashboard: React.FC = () => {
                 
                 {/* Apply form */}
                 <div className="space-y-4">
-                  <h3 className="font-display font-bold text-lg text-slate-800 dark:text-white">Request Time-Off</h3>
+                  <h3 className="font-display font-bold text-lg text-slate-800 dark:text-white">Request Leave</h3>
                   <form onSubmit={handleRequestLeave} className="p-6 rounded-3xl bg-white dark:bg-linear-card border border-slate-200/50 dark:border-white/5 shadow-premium space-y-4">
                     <div>
                       <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">Leave Date</label>
@@ -573,7 +573,7 @@ export const EmployeeDashboard: React.FC = () => {
                       type="submit"
                       className="w-full py-3.5 rounded-xl bg-blue-600 dark:bg-blue-500 text-white dark:text-slate-950 font-bold"
                     >
-                      File Time-Off
+                      Request Leave
                     </button>
                   </form>
                 </div>
@@ -595,7 +595,7 @@ export const EmployeeDashboard: React.FC = () => {
                             l.status === 'APPROVED' ? 'bg-emerald-500/10 text-emerald-500' :
                             l.status === 'REJECTED' ? 'bg-red-500/10 text-red-500' : 'bg-amber-500/10 text-amber-500'
                           }`}>
-                            {l.status || 'PENDING'}
+                            {l.status === 'APPROVED' ? 'APPROVED' : l.status === 'REJECTED' ? 'DECLINED' : 'PENDING'}
                           </span>
                         </div>
                       ))
