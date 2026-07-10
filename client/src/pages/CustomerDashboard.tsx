@@ -79,7 +79,7 @@ export const CustomerDashboard: React.FC = () => {
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
 
-  const API_URL = 'https://smartbook-backend.onrender.com/api' || 'https://smartbook-backend.onrender.com/api';
+  const API_URL = 'https://smartbook-backend-68tc.onrender.com/api' || 'https://smartbook-backend-68tc.onrender.com/api';
 
   const showToast = (msg: string) => {
     setToasts(prev => [...prev, msg]);

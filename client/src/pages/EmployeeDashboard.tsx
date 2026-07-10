@@ -50,7 +50,7 @@ export const EmployeeDashboard: React.FC = () => {
   // Toast Alerts
   const [toasts, setToasts] = useState<string[]>([]);
 
-  const API_URL = 'https://smartbook-backend.onrender.com/api' || 'https://smartbook-backend.onrender.com/api';
+  const API_URL = 'https://smartbook-backend-68tc.onrender.com/api' || 'https://smartbook-backend-68tc.onrender.com/api';
 
   const showToast = (msg: string) => {
     setToasts(prev => [...prev, msg]);

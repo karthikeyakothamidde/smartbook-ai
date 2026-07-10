@@ -43,7 +43,7 @@ export const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      const res = await fetch('https://smartbook-backend.onrender.com/api/auth/login', {
+      const res = await fetch('https://smartbook-backend-68tc.onrender.com/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -86,7 +86,7 @@ export const Login: React.FC = () => {
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch('https://smartbook-backend.onrender.com/api/auth/google-login', {
+      const res = await fetch('https://smartbook-backend-68tc.onrender.com/api/auth/google-login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
