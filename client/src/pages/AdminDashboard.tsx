@@ -253,6 +253,7 @@ export const AdminDashboard: React.FC = () => {
         showToast(`Added Employee: ${newEmpName}`);
         setNewEmpName('');
         setNewEmpEmail('');
+        setNewEmpPassword('password123');
         setNewEmpBio('');
         fetchAdminData();
       } else {
@@ -772,6 +773,17 @@ export const AdminDashboard: React.FC = () => {
                         value={newEmpEmail}
                         onChange={(e) => setNewEmpEmail(e.target.value)}
                         placeholder="sarah@smartbook.ai"
+                        className="w-full bg-slate-50 dark:bg-white/5 border dark:border-white/10 rounded-xl py-3 px-3 text-slate-800 dark:text-white focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">Password</label>
+                      <input 
+                        type="text"
+                        required
+                        value={newEmpPassword}
+                        onChange={(e) => setNewEmpPassword(e.target.value)}
+                        placeholder="e.g. password123"
                         className="w-full bg-slate-50 dark:bg-white/5 border dark:border-white/10 rounded-xl py-3 px-3 text-slate-800 dark:text-white focus:outline-none"
                       />
                     </div>
