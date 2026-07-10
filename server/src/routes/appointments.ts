@@ -109,6 +109,16 @@ router.get('/available-slots', authenticateToken, async (req: AuthenticatedReque
         const avail = emp.availability.find(a => a.dayOfWeek === dayOfWeek && !a.isClosed);
         if (!avail) continue;
 
+        // Check if employee is on approved leave on this day
+        const onLeave = await prisma.leave.findFirst({
+          where: {
+            employeeId: emp.id,
+            date: dateStr,
+            status: 'APPROVED'
+          }
+        });
+        if (onLeave) continue;
+
         // Check if slot falls within working hours
         const [wStartH, wStartM] = avail.startTime.split(':').map(Number);
         const [wEndH, wEndM] = avail.endTime.split(':').map(Number);
