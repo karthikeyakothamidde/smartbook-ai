@@ -1,0 +1,140 @@
+// Prisma Schema for SmartBook AI
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                  String         @id @default(uuid())
+  email               String         @unique
+  name                String
+  password            String
+  role                String         // "ADMIN", "EMPLOYEE", "CUSTOMER"
+  googleId            String?
+  phone               String?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  customerAppointments Appointment[] @relation("CustomerAppointments")
+  notifications       Notification[]
+  reviews             Review[]
+  employeeProfile     Employee?      @relation("UserEmployeeProfile")
+  waitlists           Waitlist[]
+}
+
+model Employee {
+  id              String         @id @default(uuid())
+  userId          String         @unique
+  user            User           @relation("UserEmployeeProfile", fields: [userId], references: [id], onDelete: Cascade)
+  skills          String         // Comma-separated values, e.g. "Dental Cleaning, Root Canal, Cavity Filling"
+  rating          Float          @default(5.0)
+  experienceYears Int            @default(1)
+  bio             String
+  active          Boolean        @default(true)
+  appointments    Appointment[]
+  availability    Availability[]
+  leaves          Leave[]
+}
+
+model Availability {
+  id         String   @id @default(uuid())
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  dayOfWeek  Int      // 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday
+  startTime  String   // e.g. "09:00"
+  endTime    String   // e.g. "17:00"
+  isClosed   Boolean  @default(false)
+}
+
+model Leave {
+  id         String   @id @default(uuid())
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  date       String   // Format: "YYYY-MM-DD"
+  reason     String?
+}
+
+model Service {
+  id           String        @id @default(uuid())
+  name         String
+  duration     Int           // in minutes
+  price        Float
+  category     String        // "Dental", "Salon", "Consulting", "Wellness"
+  description  String
+  active       Boolean       @default(true)
+  appointments Appointment[]
+  waitlists    Waitlist[]
+}
+
+model Appointment {
+  id                 String       @id @default(uuid())
+  customerId         String
+  customer           User         @relation("CustomerAppointments", fields: [customerId], references: [id], onDelete: Cascade)
+  employeeId         String
+  employee           Employee     @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  serviceId          String
+  service            Service      @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  startTime          DateTime
+  endTime            DateTime
+  status             String       @default("PENDING") // "PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"
+  noShowRisk         String       @default("LOW")     // "LOW", "MEDIUM", "HIGH"
+  noShowProbability  Float        @default(0.0)       // probability 0.0 - 1.0
+  notes              String?
+  pricePaid          Float        @default(0.0)
+  paymentStatus      String       @default("PENDING") // "PENDING", "PAID", "REFUNDED"
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  payment            Payment?
+  review             Review?
+}
+
+model Waitlist {
+  id                 String   @id @default(uuid())
+  customerId         String
+  customer           User     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  serviceId          String
+  service            Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  preferredDate      String   // Format: "YYYY-MM-DD"
+  preferredTimeRange String   // e.g. "17:00-21:00", "MORNING", "AFTERNOON", "EVENING"
+  status             String   @default("WAITING") // "WAITING", "PROMOTED", "EXPIRED"
+  createdAt          DateTime @default(now())
+}
+
+model Payment {
+  id                String      @id @default(uuid())
+  appointmentId     String      @unique
+  appointment       Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  amount            Float
+  currency          String      @default("INR")
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  status            String      @default("PENDING") // "PENDING", "SUCCESS", "FAILED"
+  invoiceNumber     String      @unique
+  createdAt         DateTime    @default(now())
+}
+
+model Review {
+  id            String      @id @default(uuid())
+  appointmentId String      @unique
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  customerId    String
+  customer      User        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  rating        Int         // 1 to 5
+  comment       String?
+  createdAt     DateTime    @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      String   // "BOOKING", "REMINDER", "WAITLIST", "SYSTEM"
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
