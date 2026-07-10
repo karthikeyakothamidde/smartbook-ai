@@ -18,7 +18,8 @@ import {
   LogOut,
   Activity,
   ListOrdered,
-  X
+  X,
+  AlertCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -157,6 +158,13 @@ export const AdminDashboard: React.FC = () => {
       return;
     }
     fetchAdminData();
+
+    // Real-time polling: refresh dashboard data every 10 seconds
+    const interval = setInterval(() => {
+      fetchAdminData();
+    }, 10000);
+
+    return () => clearInterval(interval);
   }, [token]);
 
   // Synchronize admin settings when user object completes loading
@@ -451,6 +459,8 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  const pendingLeavesCount = leaves.filter(l => l.status === 'PENDING').length;
+
   // Map database appointments to FullCalendar format
   const calendarEvents = appointments.map(app => {
     // Set colors based on status
@@ -536,13 +546,20 @@ export const AdminDashboard: React.FC = () => {
             </button>
             <button 
               onClick={() => setActiveTab('employees')}
-              className={`w-full py-3 px-4 rounded-xl text-sm font-semibold flex items-center gap-3.5 transition-all ${
+              className={`w-full py-3 px-4 rounded-xl text-sm font-semibold flex items-center justify-between transition-all ${
                 activeTab === 'employees'
                   ? 'bg-blue-600 text-white shadow-md'
                   : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5'
               }`}
             >
-              <UserPlus className="h-4.5 w-4.5" /> Staff Management
+              <div className="flex items-center gap-3.5">
+                <UserPlus className="h-4.5 w-4.5" /> Staff Management
+              </div>
+              {pendingLeavesCount > 0 && (
+                <span className="px-2.5 py-0.5 text-[10px] font-extrabold rounded-full bg-amber-500 text-slate-950 shadow animate-pulse">
+                  {pendingLeavesCount}
+                </span>
+              )}
             </button>
             <button 
               onClick={() => setActiveTab('services')}
@@ -611,6 +628,30 @@ export const AdminDashboard: React.FC = () => {
             {/* Tab: Calendar */}
             {activeTab === 'calendar' && (
               <div className="space-y-6">
+                
+                {/* Floating Real-time Leave Requests Notification Banner */}
+                {pendingLeavesCount > 0 && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    onClick={() => setActiveTab('employees')}
+                    className="p-4 rounded-3xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 flex items-center justify-between cursor-pointer hover:bg-amber-500/15 transition-all shadow-lg shadow-amber-500/5 animate-pulse"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 bg-amber-500/20 rounded-xl flex items-center justify-center">
+                        <AlertCircle className="h-5 w-5 text-amber-500" />
+                      </div>
+                      <div>
+                        <span className="font-bold text-sm block">Pending Leave Requests</span>
+                        <span className="text-xs opacity-80">You have {pendingLeavesCount} staff leave request{pendingLeavesCount > 1 ? 's' : ''} awaiting approval. Click here to review.</span>
+                      </div>
+                    </div>
+                    <span className="text-xs font-bold bg-amber-500 text-slate-950 px-2.5 py-1 rounded-lg">
+                      Review
+                    </span>
+                  </motion.div>
+                )}
+
                 <div className="p-6 rounded-3xl bg-white dark:bg-[#12111a] border border-slate-200/50 dark:border-white/5 shadow-premium">
                   <div className="flex items-center gap-2 mb-6">
                     <CalendarIcon className="h-5 w-5 text-blue-500" />
@@ -1100,48 +1141,97 @@ export const AdminDashboard: React.FC = () => {
             )}
 
             {/* Tab: Waitlist queue */}
-            {activeTab === 'waitlist' && (
-              <div className="space-y-4">
-                <h3 className="font-display font-bold text-lg text-slate-800 dark:text-white">Active Waitlist Queue</h3>
-                
-                <div className="p-6 rounded-3xl bg-white dark:bg-linear-card border border-slate-200/50 dark:border-white/5 shadow-premium">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="border-b border-slate-100 dark:border-white/5 text-xs text-slate-400 font-bold uppercase">
-                        <th className="pb-3">Client</th>
-                        <th className="pb-3">Service Requested</th>
-                        <th className="pb-3">Date</th>
-                        <th className="pb-3">Hour Range</th>
-                        <th className="pb-3">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="text-sm divide-y divide-slate-100 dark:divide-white/5">
-                      {waitlist.length === 0 ? (
-                        <tr>
-                          <td colSpan={5} className="py-8 text-center text-slate-400">No waitlisted clients found.</td>
-                        </tr>
-                      ) : (
-                        waitlist.map(w => (
-                          <tr key={w.id} className="text-slate-700 dark:text-slate-300">
-                            <td className="py-3 font-semibold text-slate-900 dark:text-white">{w.customer.name}</td>
-                            <td className="py-3">{w.service.name}</td>
-                            <td className="py-3">{w.preferredDate}</td>
-                            <td className="py-3">{w.preferredTimeRange}</td>
-                            <td className="py-3">
-                              <span className={`px-2 py-0.5 text-[9px] font-bold rounded ${
-                                w.status === 'PROMOTED' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'
-                              }`}>
-                                {w.status}
-                              </span>
-                            </td>
+            {activeTab === 'waitlist' && (() => {
+              const todayStr = new Date().toISOString().split('T')[0];
+              const todayWaitlist = waitlist.filter(w => w.preferredDate === todayStr);
+              const upcomingWaitlist = waitlist.filter(w => w.preferredDate !== todayStr);
+
+              return (
+                <div className="space-y-8">
+                  {/* Today's Waitlist */}
+                  <div className="space-y-4">
+                    <h3 className="font-display font-bold text-lg text-slate-800 dark:text-white">Today's Waitlist Queue ({todayWaitlist.length})</h3>
+                    <div className="p-6 rounded-3xl bg-white dark:bg-linear-card border border-slate-200/50 dark:border-white/5 shadow-premium">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="border-b border-slate-100 dark:border-white/5 text-xs text-slate-400 font-bold uppercase">
+                            <th className="pb-3">Client</th>
+                            <th className="pb-3">Service Requested</th>
+                            <th className="pb-3">Date</th>
+                            <th className="pb-3">Hour Range</th>
+                            <th className="pb-3">Status</th>
                           </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
+                        </thead>
+                        <tbody className="text-sm divide-y divide-slate-100 dark:divide-white/5">
+                          {todayWaitlist.length === 0 ? (
+                            <tr>
+                              <td colSpan={5} className="py-8 text-center text-slate-400">No waitlisted clients for today.</td>
+                            </tr>
+                          ) : (
+                            todayWaitlist.map(w => (
+                              <tr key={w.id} className="text-slate-700 dark:text-slate-300">
+                                <td className="py-3 font-semibold text-slate-900 dark:text-white">{w.customer.name}</td>
+                                <td className="py-3">{w.service.name}</td>
+                                <td className="py-3">{w.preferredDate}</td>
+                                <td className="py-3">{w.preferredTimeRange}</td>
+                                <td className="py-3">
+                                  <span className={`px-2 py-0.5 text-[9px] font-bold rounded ${
+                                    w.status === 'PROMOTED' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'
+                                  }`}>
+                                    {w.status}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Upcoming Waitlist */}
+                  <div className="space-y-4">
+                    <h3 className="font-display font-bold text-lg text-slate-800 dark:text-white">Upcoming Waitlist Queue ({upcomingWaitlist.length})</h3>
+                    <div className="p-6 rounded-3xl bg-white dark:bg-linear-card border border-slate-200/50 dark:border-white/5 shadow-premium">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="border-b border-slate-100 dark:border-white/5 text-xs text-slate-400 font-bold uppercase">
+                            <th className="pb-3">Client</th>
+                            <th className="pb-3">Service Requested</th>
+                            <th className="pb-3">Date</th>
+                            <th className="pb-3">Hour Range</th>
+                            <th className="pb-3">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="text-sm divide-y divide-slate-100 dark:divide-white/5">
+                          {upcomingWaitlist.length === 0 ? (
+                            <tr>
+                              <td colSpan={5} className="py-8 text-center text-slate-400">No upcoming waitlisted clients.</td>
+                            </tr>
+                          ) : (
+                            upcomingWaitlist.map(w => (
+                              <tr key={w.id} className="text-slate-700 dark:text-slate-300">
+                                <td className="py-3 font-semibold text-slate-900 dark:text-white">{w.customer.name}</td>
+                                <td className="py-3">{w.service.name}</td>
+                                <td className="py-3">{w.preferredDate}</td>
+                                <td className="py-3">{w.preferredTimeRange}</td>
+                                <td className="py-3">
+                                  <span className={`px-2 py-0.5 text-[9px] font-bold rounded ${
+                                    w.status === 'PROMOTED' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'
+                                  }`}>
+                                    {w.status}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* Tab: Settings */}
             {activeTab === 'settings' && (
