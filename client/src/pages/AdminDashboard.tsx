@@ -90,9 +90,9 @@ export const AdminDashboard: React.FC = () => {
     }, 4000);
   };
 
-  const fetchAdminData = async () => {
+  const fetchAdminData = async (showSkeleton = false) => {
     if (!token) return;
-    setLoading(true);
+    if (showSkeleton) setLoading(true);
     try {
       // 1. Fetch appointments
       const appRes = await fetch(`${API_URL}/appointments`, {
@@ -157,11 +157,11 @@ export const AdminDashboard: React.FC = () => {
       navigate('/login');
       return;
     }
-    fetchAdminData();
+    fetchAdminData(true); // Show loading skeleton on first mount
 
-    // Real-time polling: refresh dashboard data every 10 seconds
+    // Real-time polling: refresh dashboard data silently every 10 seconds
     const interval = setInterval(() => {
-      fetchAdminData();
+      fetchAdminData(false);
     }, 10000);
 
     return () => clearInterval(interval);
