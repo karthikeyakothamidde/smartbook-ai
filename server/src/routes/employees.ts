@@ -164,6 +164,9 @@ router.post('/me/leave', authenticateToken, requireRole(['EMPLOYEE']), async (re
   } catch (error) {
     console.error("Record leave error:", error);
     return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 // Admin: Delete employee profile and associated user
 router.delete('/:id', authenticateToken, requireRole(['ADMIN']), async (req: AuthenticatedRequest, res: Response) => {
   const { id } = req.params;
