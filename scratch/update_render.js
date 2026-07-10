@@ -25,7 +25,7 @@ function request(options, body) {
 
 async function run() {
   try {
-    // 1. Update build command on Render to run db push
+    // 1. Update build command on Render to run local npm prisma:push script
     const update = await request({
       hostname: 'api.render.com',
       path: `/v1/services/${serviceId}`,
@@ -37,7 +37,7 @@ async function run() {
     }, {
       serviceDetails: {
         envSpecificDetails: {
-          buildCommand: 'npm install --production=false --prefix server && npx prisma db push --schema=./server/prisma/schema.prisma && npm run prisma:generate --prefix server && npm run build --prefix server'
+          buildCommand: 'npm install --production=false --prefix server && npm run prisma:push --prefix server && npm run prisma:generate --prefix server && npm run build --prefix server'
         }
       }
     });
