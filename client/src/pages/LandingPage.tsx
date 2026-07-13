@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { 
   Calendar, 
   Sparkles, 
@@ -20,6 +21,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const LandingPage: React.FC = () => {
+  const { token, user } = useAuth();
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
@@ -160,13 +162,24 @@ export const LandingPage: React.FC = () => {
             {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
           
-          <Link to="/login" className="hidden sm:inline-block text-sm font-semibold hover:text-blue-500 dark:hover:text-blue-400 transition-colors px-3 py-2 text-slate-600 dark:text-slate-300">
-            Sign In
-          </Link>
-          
-          <Link to="/register" className="btn-premium px-5 py-2.5 rounded-xl text-sm font-semibold">
-            Get Started
-          </Link>
+          {token && user ? (
+            <Link 
+              to={user.role === 'ADMIN' ? "/admin" : user.role === 'EMPLOYEE' ? "/employee" : "/customer"} 
+              className="btn-premium px-5 py-2.5 rounded-xl text-sm font-semibold"
+            >
+              Go to Dashboard
+            </Link>
+          ) : (
+            <>
+              <Link to="/login" className="hidden sm:inline-block text-sm font-semibold hover:text-blue-500 dark:hover:text-blue-400 transition-colors px-3 py-2 text-slate-600 dark:text-slate-300">
+                Sign In
+              </Link>
+              
+              <Link to="/register" className="btn-premium px-5 py-2.5 rounded-xl text-sm font-semibold">
+                Get Started
+              </Link>
+            </>
+          )}
         </div>
       </nav>
 
@@ -205,12 +218,23 @@ export const LandingPage: React.FC = () => {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="flex flex-col sm:flex-row gap-4 mb-16"
         >
-          <Link to="/register" className="btn-premium px-8 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 group">
-            Start Free Trial <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-          </Link>
-          <a href="#features" className="px-8 py-4 rounded-2xl font-semibold border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors text-slate-700 dark:text-slate-300">
-            See Features
-          </a>
+          {token && user ? (
+            <Link 
+              to={user.role === 'ADMIN' ? "/admin" : user.role === 'EMPLOYEE' ? "/employee" : "/customer"} 
+              className="btn-premium px-8 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 group"
+            >
+              Go to Dashboard <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          ) : (
+            <>
+              <Link to="/register" className="btn-premium px-8 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 group">
+                Start Free Trial <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <a href="#features" className="px-8 py-4 rounded-2xl font-semibold border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors text-slate-700 dark:text-slate-300">
+                See Features
+              </a>
+            </>
+          )}
         </motion.div>
 
         {/* Animated Dashboard Mockup */}

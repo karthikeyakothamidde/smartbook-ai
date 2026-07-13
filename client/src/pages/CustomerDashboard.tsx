@@ -88,9 +88,9 @@ export const CustomerDashboard: React.FC = () => {
     }, 4000);
   };
 
-  const fetchData = async () => {
+  const fetchData = async (showSkeleton = false) => {
     if (!token) return;
-    setLoadingData(true);
+    if (showSkeleton) setLoadingData(true);
     try {
       // Fetch appointments
       const appRes = await fetch(`${API_URL}/appointments`, {
@@ -145,7 +145,14 @@ export const CustomerDashboard: React.FC = () => {
       navigate('/login');
       return;
     }
-    fetchData();
+    fetchData(true); // Show skeleton on initial mount
+
+    // Real-time polling: refresh dashboard silently every 10 seconds
+    const interval = setInterval(() => {
+      fetchData(false);
+    }, 10000);
+
+    return () => clearInterval(interval);
   }, [token]);
 
   // Fetch available slots dynamically when inputs change
@@ -524,8 +531,8 @@ export const CustomerDashboard: React.FC = () => {
   };
 
   // Filter lists
-  const upcomingApps = appointments.filter(a => a.status === 'CONFIRMED' && new Date(a.startTime) > new Date());
-  const historyApps = appointments.filter(a => a.status === 'COMPLETED' || a.status === 'CANCELLED' || (a.status === 'CONFIRMED' && new Date(a.startTime) <= new Date()));
+  const upcomingApps = appointments.filter(a => a.status === 'CONFIRMED');
+  const historyApps = appointments.filter(a => a.status === 'COMPLETED' || a.status === 'CANCELLED');
 
   if (!user) return null;
 

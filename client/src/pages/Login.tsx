@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Sparkles, Mail, Lock, AlertCircle, ArrowLeft, X } from 'lucide-react';
@@ -17,8 +17,21 @@ export const Login: React.FC = () => {
   const [customGoogleEmail, setCustomGoogleEmail] = useState('');
   const [customGoogleName, setCustomGoogleName] = useState('');
 
-  const { login } = useAuth();
+  const { login, token, user } = useAuth();
   const navigate = useNavigate();
+
+  // If user is already logged in, redirect them to dashboard directly (prevent back button showing login page)
+  useEffect(() => {
+    if (token && user) {
+      if (user.role === 'ADMIN') {
+        navigate('/admin', { replace: true });
+      } else if (user.role === 'EMPLOYEE') {
+        navigate('/employee', { replace: true });
+      } else {
+        navigate('/customer', { replace: true });
+      }
+    }
+  }, [token, user, navigate]);
 
   const handleQuickFill = (type: 'CUSTOMER' | 'EMPLOYEE' | 'ADMIN') => {
     setRole(type);
@@ -265,24 +278,25 @@ export const Login: React.FC = () => {
                   
                   {/* Account list buttons */}
                   <button 
-                    onClick={() => triggerGoogleAuth('karthikeya.k@gmail.com', 'K Karthikeya')}
+                    onClick={() => triggerGoogleAuth('client.johndoe@gmail.com', 'John Doe')}
                     className="w-full p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center justify-between text-xs font-semibold transition-all"
                   >
                     <div className="text-left">
-                      <span className="block text-slate-800 font-bold">K Karthikeya</span>
-                      <span className="text-slate-400 font-medium">karthikeya.k@gmail.com</span>
+                      <span className="block text-slate-800 font-bold">John Doe</span>
+                      <span className="text-slate-400 font-medium">client.johndoe@gmail.com</span>
                     </div>
-                    <span className="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full font-bold">Default</span>
+                    <span className="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full font-bold">Client</span>
                   </button>
 
                   <button 
-                    onClick={() => triggerGoogleAuth('study.helper.ai@gmail.com', 'Study Helper AI')}
+                    onClick={() => triggerGoogleAuth('customer.sarah@gmail.com', 'Sarah Connor')}
                     className="w-full p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center justify-between text-xs font-semibold transition-all"
                   >
                     <div className="text-left">
-                      <span className="block text-slate-800 font-bold">Study Helper AI</span>
-                      <span className="text-slate-400 font-medium">study.helper.ai@gmail.com</span>
+                      <span className="block text-slate-800 font-bold">Sarah Connor</span>
+                      <span className="text-slate-400 font-medium">customer.sarah@gmail.com</span>
                     </div>
+                    <span className="text-[10px] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full font-bold">Client</span>
                   </button>
 
                   <button 
@@ -310,7 +324,7 @@ export const Login: React.FC = () => {
                     <input 
                       type="text"
                       required
-                      placeholder="e.g. K Karthikeya"
+                      placeholder="e.g. Sarah Connor"
                       value={customGoogleName}
                       onChange={(e) => setCustomGoogleName(e.target.value)}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-3 text-xs text-slate-800 focus:outline-none"
@@ -322,7 +336,7 @@ export const Login: React.FC = () => {
                     <input 
                       type="email"
                       required
-                      placeholder="e.g. karthikeya.k@gmail.com"
+                      placeholder="e.g. client@gmail.com"
                       value={customGoogleEmail}
                       onChange={(e) => setCustomGoogleEmail(e.target.value)}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-3 text-xs text-slate-800 focus:outline-none"

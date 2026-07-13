@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Sparkles, Mail, Lock, User, Phone, AlertCircle, ArrowLeft } from 'lucide-react';
@@ -15,8 +15,21 @@ export const Register: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const { login } = useAuth();
+  const { login, token, user } = useAuth();
   const navigate = useNavigate();
+
+  // If user is already logged in, redirect them to dashboard directly (prevent back button showing register page)
+  useEffect(() => {
+    if (token && user) {
+      if (user.role === 'ADMIN') {
+        navigate('/admin', { replace: true });
+      } else if (user.role === 'EMPLOYEE') {
+        navigate('/employee', { replace: true });
+      } else {
+        navigate('/customer', { replace: true });
+      }
+    }
+  }, [token, user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

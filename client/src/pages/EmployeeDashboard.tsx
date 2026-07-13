@@ -60,9 +60,9 @@ export const EmployeeDashboard: React.FC = () => {
     }, 4000);
   };
 
-  const fetchEmployeeData = async () => {
+  const fetchEmployeeData = async (showSkeleton = false) => {
     if (!token) return;
-    setLoading(true);
+    if (showSkeleton) setLoading(true);
     try {
       // 1. Fetch Appointments
       const appRes = await fetch(`${API_URL}/appointments`, {
@@ -96,7 +96,14 @@ export const EmployeeDashboard: React.FC = () => {
       return;
     }
     if (user) {
-      fetchEmployeeData();
+      fetchEmployeeData(true); // Show skeleton on initial mount
+
+      // Real-time polling: refresh dashboard silently every 10 seconds
+      const interval = setInterval(() => {
+        fetchEmployeeData(false);
+      }, 10000);
+
+      return () => clearInterval(interval);
     }
   }, [token, user]);
 
