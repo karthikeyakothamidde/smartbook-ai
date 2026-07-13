@@ -26,6 +26,58 @@ export const LandingPage: React.FC = () => {
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
+  // AI Interactive Booking Demo States
+  const [nlpInput, setNlpInput] = useState("Dental cleaning next Tuesday morning");
+  const [parsedService, setParsedService] = useState("Dental Cleaning");
+  const [parsedDate, setParsedDate] = useState("Tuesday (Next Week)");
+  const [parsedTime, setParsedTime] = useState("Morning (09:00 AM - 12:00 PM)");
+  const [parsedStaff, setParsedStaff] = useState("Dr. Sarah");
+
+  useEffect(() => {
+    const text = nlpInput.toLowerCase();
+    
+    // Simple client-side NLP mock
+    if (text.includes("teeth") || text.includes("dental") || text.includes("root") || text.includes("cleaning") || text.includes("checkup")) {
+      setParsedService("Dental Checkup & Cleaning");
+    } else if (text.includes("hair") || text.includes("cut") || text.includes("salon") || text.includes("trim") || text.includes("styling")) {
+      setParsedService("Premium Haircut & Styling");
+    } else if (text.includes("consult") || text.includes("advice") || text.includes("business") || text.includes("strategy")) {
+      setParsedService("Strategic Business Consulting");
+    } else {
+      setParsedService("General Wellness Session");
+    }
+
+    if (text.includes("tuesday")) {
+      setParsedDate("Tuesday (Next Week)");
+    } else if (text.includes("monday")) {
+      setParsedDate("Monday (Next Week)");
+    } else if (text.includes("tomorrow")) {
+      setParsedDate("Tomorrow (July 14)");
+    } else if (text.includes("today")) {
+      setParsedDate("Today (July 13)");
+    } else {
+      setParsedDate("Select Date & Schedule");
+    }
+
+    if (text.includes("morning") || text.includes("am")) {
+      setParsedTime("Morning (09:00 AM - 12:00 PM)");
+    } else if (text.includes("afternoon") || text.includes("pm")) {
+      setParsedTime("Afternoon (01:00 PM - 04:00 PM)");
+    } else if (text.includes("evening")) {
+      setParsedTime("Evening (05:00 PM - 07:00 PM)");
+    } else {
+      setParsedTime("Next Available Slot");
+    }
+
+    if (text.includes("sarah") || text.includes("dr. sarah")) {
+      setParsedStaff("Sarah Connor");
+    } else if (text.includes("john") || text.includes("doe")) {
+      setParsedStaff("John Doe");
+    } else {
+      setParsedStaff("Best Match Auto-Allocated");
+    }
+  }, [nlpInput]);
+
   useEffect(() => {
     const root = window.document.documentElement;
     if (isDarkMode) {
@@ -285,13 +337,43 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* Simulated AI booking prompt mockup */}
-            <div className="p-4 rounded-2xl bg-slate-900 border border-blue-500/30 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <Sparkles className="h-5 w-5 text-blue-400 animate-pulse" />
-                <span className="text-sm text-slate-200">"I need root canal next Monday morning with Dr. Sarah"</span>
+            <div className="p-5 rounded-2xl bg-slate-900 border border-blue-500/30 space-y-4">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4.5 w-4.5 text-blue-400 animate-pulse" />
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Try Interactive AI Booking Demo</span>
+                </div>
+                <span className="text-[10px] text-blue-400 font-bold bg-blue-500/10 px-2 py-0.5 rounded-full">Natural Language Parser</span>
               </div>
-              <div className="px-3.5 py-1.5 rounded-lg bg-blue-500 text-slate-950 text-xs font-bold shadow-md shadow-blue-500/20">
-                AI MATCHED - Confirmed
+              
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  value={nlpInput}
+                  onChange={(e) => setNlpInput(e.target.value)}
+                  placeholder="e.g. Need dental checkup next Monday afternoon with Sarah"
+                  className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50"
+                />
+              </div>
+
+              {/* Parsed Live Badges */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 text-[11px] font-semibold text-slate-300">
+                <div className="p-3 bg-white/5 border border-white/5 rounded-xl space-y-1.5">
+                  <span className="text-[9px] uppercase font-bold text-slate-500 block">Service</span>
+                  <span className="text-white truncate block">{parsedService}</span>
+                </div>
+                <div className="p-3 bg-white/5 border border-white/5 rounded-xl space-y-1.5">
+                  <span className="text-[9px] uppercase font-bold text-slate-500 block">Date</span>
+                  <span className="text-white truncate block">{parsedDate}</span>
+                </div>
+                <div className="p-3 bg-white/5 border border-white/5 rounded-xl space-y-1.5">
+                  <span className="text-[9px] uppercase font-bold text-slate-500 block">Time Schedule</span>
+                  <span className="text-white truncate block">{parsedTime}</span>
+                </div>
+                <div className="p-3 bg-white/5 border border-white/5 rounded-xl space-y-1.5">
+                  <span className="text-[9px] uppercase font-bold text-slate-500 block">Assigned Staff</span>
+                  <span className="text-white truncate block">{parsedStaff}</span>
+                </div>
               </div>
             </div>
             
@@ -328,6 +410,28 @@ export const LandingPage: React.FC = () => {
               </p>
             </motion.div>
           ))}
+        </div>
+      </section>
+
+      {/* Trust & Statistics Section */}
+      <section className="py-16 bg-slate-900 text-white border-t border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div>
+            <h3 className="text-4xl font-extrabold text-blue-400 font-display">98%</h3>
+            <p className="text-xs text-slate-400 uppercase tracking-widest mt-2 font-bold">No-Show Reduction</p>
+          </div>
+          <div>
+            <h3 className="text-4xl font-extrabold text-indigo-400 font-display">12,000+</h3>
+            <p className="text-xs text-slate-400 uppercase tracking-widest mt-2 font-bold">Bookings Managed</p>
+          </div>
+          <div>
+            <h3 className="text-4xl font-extrabold text-purple-400 font-display">15,000h</h3>
+            <p className="text-xs text-slate-400 uppercase tracking-widest mt-2 font-bold">Hours Optimized</p>
+          </div>
+          <div>
+            <h3 className="text-4xl font-extrabold text-emerald-400 font-display">4.9/5</h3>
+            <p className="text-xs text-slate-400 uppercase tracking-widest mt-2 font-bold">Client Satisfaction</p>
+          </div>
         </div>
       </section>
 
@@ -415,6 +519,67 @@ export const LandingPage: React.FC = () => {
               </Link>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Testimonials Hub Section */}
+      <section className="py-24 bg-slate-100/50 dark:bg-black/20 border-t border-slate-200/50 dark:border-white/5">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 text-center">
+          <div className="max-w-3xl mx-auto mb-16">
+            <h2 className="font-display text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white mb-6 animate-fade-in">
+              Empowering High-Growth Businesses
+            </h2>
+            <p className="text-slate-600 dark:text-slate-400 text-lg">
+              Hear from dental clinics, salons, and consultancies leveraging SmartBook AI.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+            <div className="p-8 rounded-3xl bg-white dark:bg-linear-card border border-slate-200/60 dark:border-white/5 shadow-premium space-y-6">
+              <p className="text-slate-600 dark:text-slate-300 italic text-sm leading-relaxed">
+                "SmartBook AI reduced our clinic's no-show rate from 23% to less than 3% in just one month. The automated waitlist promotion is a game-changer."
+              </p>
+              <div className="flex items-center gap-3 pt-2">
+                <div className="h-10 w-10 rounded-full bg-blue-500/20 text-blue-500 font-bold flex items-center justify-center text-xs">
+                  AR
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 dark:text-white text-xs">Dr. Amanda Ross</h4>
+                  <span className="text-[10px] text-slate-400 block mt-0.5">Director, DentalCare Clinic</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-8 rounded-3xl bg-white dark:bg-linear-card border border-slate-200/60 dark:border-white/5 shadow-premium space-y-6">
+              <p className="text-slate-600 dark:text-slate-300 italic text-sm leading-relaxed">
+                "Our clients love booking through text. No login hoops, no clicking around. They just type what they need, and the AI parses it instantly."
+              </p>
+              <div className="flex items-center gap-3 pt-2">
+                <div className="h-10 w-10 rounded-full bg-indigo-500/20 text-indigo-500 font-bold flex items-center justify-center text-xs">
+                  MV
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 dark:text-white text-xs">Marcus Vance</h4>
+                  <span className="text-[10px] text-slate-400 block mt-0.5">Owner, Velvet Salon & Spa</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-8 rounded-3xl bg-white dark:bg-linear-card border border-slate-200/60 dark:border-white/5 shadow-premium space-y-6">
+              <p className="text-slate-600 dark:text-slate-300 italic text-sm leading-relaxed">
+                "The workload allocation feature has made shift scheduling incredibly fair for our consulting team. Burnout is down, productivity is way up."
+              </p>
+              <div className="flex items-center gap-3 pt-2">
+                <div className="h-10 w-10 rounded-full bg-purple-500/20 text-purple-500 font-bold flex items-center justify-center text-xs">
+                  SM
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 dark:text-white text-xs">Sophia Martinez</h4>
+                  <span className="text-[10px] text-slate-400 block mt-0.5">HR Operations, Vanguard Consulting Group</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

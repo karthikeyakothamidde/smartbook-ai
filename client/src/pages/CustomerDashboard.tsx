@@ -78,6 +78,28 @@ export const CustomerDashboard: React.FC = () => {
   // Toast Alerts
   const [toasts, setToasts] = useState<string[]>([]);
 
+  // Booking Wizard States
+  const [bookingStep, setBookingStep] = useState(1);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [confettiParticles, setConfettiParticles] = useState<any[]>([]);
+
+  const triggerConfetti = () => {
+    setShowConfetti(true);
+    const particles = Array.from({ length: 120 }).map((_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      delay: Math.random() * 2,
+      color: ['bg-red-500', 'bg-blue-500', 'bg-yellow-500', 'bg-green-500', 'bg-pink-500', 'bg-purple-500', 'bg-orange-500'][Math.floor(Math.random() * 7)],
+      duration: 2.5 + Math.random() * 2,
+      size: 5 + Math.random() * 8
+    }));
+    setConfettiParticles(particles);
+    setTimeout(() => {
+      setShowConfetti(false);
+      setConfettiParticles([]);
+    }, 4500);
+  };
+
   // Dynamic Available Slots
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
@@ -369,11 +391,13 @@ export const CustomerDashboard: React.FC = () => {
 
       if (res.ok) {
         showToast("Appointment successfully scheduled!");
+        triggerConfetti();
         // Reset Form
         setSelectedService('');
         setSelectedEmployee('');
         setSelectedDate('');
         setNotes('');
+        setBookingStep(1);
         fetchData();
         setActiveTab('dashboard');
       } else if (res.status === 409 && data.suggestWaitlist) {
@@ -893,8 +917,26 @@ export const CustomerDashboard: React.FC = () => {
             {activeTab === 'booking' && (
               <div className="space-y-8 max-w-2xl">
                 <div>
-                  <h1 className="font-display text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">Manual Booking</h1>
-                  <p className="text-slate-500 dark:text-slate-400 mt-1">Select your desired service, date, and preferred staff member.</p>
+                  <h1 className="font-display text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white">Schedule Appointment</h1>
+                  <p className="text-slate-500 dark:text-slate-400 mt-1">Our intelligent booking wizard will secure your session in seconds.</p>
+                </div>
+
+                {/* Progress Indicators bar */}
+                <div className="flex items-center justify-between bg-white dark:bg-linear-card border border-slate-200/50 dark:border-white/5 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center gap-2">
+                    <span className={`h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold font-display ${bookingStep >= 1 ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400 dark:bg-white/5'}`}>1</span>
+                    <span className={`text-xs font-semibold ${bookingStep >= 1 ? 'text-slate-800 dark:text-white' : 'text-slate-400'}`}>Service & Staff</span>
+                  </div>
+                  <div className="h-0.5 flex-1 mx-4 bg-slate-100 dark:bg-white/5" />
+                  <div className="flex items-center gap-2">
+                    <span className={`h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold font-display ${bookingStep >= 2 ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400 dark:bg-white/5'}`}>2</span>
+                    <span className={`text-xs font-semibold ${bookingStep >= 2 ? 'text-slate-800 dark:text-white' : 'text-slate-400'}`}>Date & Time</span>
+                  </div>
+                  <div className="h-0.5 flex-1 mx-4 bg-slate-100 dark:bg-white/5" />
+                  <div className="flex items-center gap-2">
+                    <span className={`h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold font-display ${bookingStep >= 3 ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400 dark:bg-white/5'}`}>3</span>
+                    <span className={`text-xs font-semibold ${bookingStep >= 3 ? 'text-slate-800 dark:text-white' : 'text-slate-400'}`}>Confirm</span>
+                  </div>
                 </div>
 
                 {bookingError && (
@@ -905,134 +947,204 @@ export const CustomerDashboard: React.FC = () => {
 
                 <form onSubmit={handleManualBooking} className="p-8 rounded-3xl bg-white dark:bg-linear-card border border-slate-200/50 dark:border-white/5 shadow-premium space-y-6">
                   
-                  {/* Select Service */}
-                  <div>
-                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">Service</label>
-                    <select 
-                      value={selectedService}
-                      onChange={(e) => {
-                        setSelectedService(e.target.value);
-                        setSelectedEmployee('');
-                      }}
-                      className="w-full bg-slate-50 dark:bg-[#12111a] border border-slate-200 dark:border-white/10 rounded-xl py-3 px-3 text-slate-800 dark:text-white focus:outline-none"
-                    >
-                      <option value="">Choose a Service...</option>
-                      {services.map(s => (
-                        <option key={s.id} value={s.id}>{s.name} (₹{s.price} - {s.duration} min)</option>
-                      ))}
-                    </select>
-                  </div>
+                  {/* Step 1: Select Service & Staff */}
+                  {bookingStep === 1 && (
+                    <div className="space-y-6 animate-fade-in">
+                      <div>
+                        <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">Select Service</label>
+                        <select 
+                          value={selectedService}
+                          onChange={(e) => {
+                            setSelectedService(e.target.value);
+                            setSelectedEmployee('');
+                          }}
+                          className="w-full bg-slate-50 dark:bg-[#12111a] border border-slate-200 dark:border-white/10 rounded-xl py-3 px-3 text-slate-800 dark:text-white focus:outline-none"
+                        >
+                          <option value="">Choose a Service...</option>
+                          {services.map(s => (
+                            <option key={s.id} value={s.id}>{s.name} (₹{s.price} - {s.duration} min)</option>
+                          ))}
+                        </select>
+                      </div>
 
-                  {/* Select Staff (Filtered based on chosen service category) */}
-                  <div>
-                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">Staff Member (Optional)</label>
-                    <select 
-                      value={selectedEmployee}
-                      onChange={(e) => setSelectedEmployee(e.target.value)}
-                      disabled={!selectedService}
-                      className="w-full bg-slate-50 dark:bg-[#12111a] border border-slate-200 dark:border-white/10 rounded-xl py-3 px-3 text-slate-800 dark:text-white focus:outline-none disabled:opacity-55"
-                    >
-                      {!selectedService ? (
-                        <option value="">Please select a service first...</option>
-                      ) : (
-                        <>
-                          <option value="">Any Staff (AI Auto-Allocation)</option>
-                          {employees
-                            .filter(emp => {
-                              const sObj = services.find(s => s.id === selectedService);
-                              return sObj && emp.skills.toLowerCase().includes(sObj.category.toLowerCase());
-                            })
-                            .map(e => (
-                              <option key={e.id} value={e.id}>{e.name} (★ {e.rating})</option>
-                            ))}
-                        </>
-                      )}
-                    </select>
-                  </div>
+                      <div>
+                        <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">Select Staff Member (Optional)</label>
+                        <select 
+                          value={selectedEmployee}
+                          onChange={(e) => setSelectedEmployee(e.target.value)}
+                          disabled={!selectedService}
+                          className="w-full bg-slate-50 dark:bg-[#12111a] border border-slate-200 dark:border-white/10 rounded-xl py-3 px-3 text-slate-800 dark:text-white focus:outline-none disabled:opacity-55"
+                        >
+                          {!selectedService ? (
+                            <option value="">Please select a service first...</option>
+                          ) : (
+                            <>
+                              <option value="">Any Staff (AI Auto-Allocation)</option>
+                              {employees
+                                .filter(emp => {
+                                  const sObj = services.find(s => s.id === selectedService);
+                                  return sObj && emp.skills.toLowerCase().includes(sObj.category.toLowerCase());
+                                })
+                                .map(e => (
+                                  <option key={e.id} value={e.id}>{e.name} (★ {e.rating})</option>
+                                ))}
+                            </>
+                          )}
+                        </select>
+                      </div>
 
-                  {/* Date & Time */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">Preferred Date</label>
-                      <input 
-                        type="date"
-                        required
-                        min={new Date().toLocaleDateString('en-CA')}
-                        value={selectedDate}
-                        onChange={(e) => setSelectedDate(e.target.value)}
-                        className="w-full bg-slate-50 dark:bg-[#12111a] border border-slate-200 dark:border-white/10 rounded-xl py-3 px-3 text-slate-800 dark:text-white focus:outline-none"
-                      />
+                      <button
+                        type="button"
+                        disabled={!selectedService}
+                        onClick={() => setBookingStep(2)}
+                        className="w-full py-3.5 rounded-xl bg-blue-600 dark:bg-blue-500 text-white dark:text-slate-950 font-bold shadow hover:bg-blue-700 dark:hover:bg-blue-400 transition-all disabled:opacity-50"
+                      >
+                        Continue to Schedule
+                      </button>
                     </div>
-                    <div>
-                      <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">Available Time Slots</label>
-                      {!selectedDate ? (
-                        <div className="py-3.5 px-4 text-xs bg-slate-50 dark:bg-white/5 border dark:border-white/10 text-slate-400 rounded-xl italic">
-                          Please select a preferred date first...
-                        </div>
-                      ) : slotsLoading ? (
-                        <div className="py-3 px-4 text-xs text-blue-500 font-semibold flex items-center gap-2">
-                          <div className="h-4 w-4 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
-                          Checking live schedules...
-                        </div>
-                      ) : (() => {
-                        const todayLocal = new Date().toLocaleDateString('en-CA');
-                        const displaySlots = selectedDate === todayLocal
-                          ? availableSlots.filter(slot => {
-                              const [h, m] = slot.split(':').map(Number);
-                              const slotTime = new Date();
-                              slotTime.setHours(h, m, 0, 0);
-                              return slotTime.getTime() > Date.now() + 15 * 60 * 1000; // 15-minute safety buffer
-                            })
-                          : availableSlots;
+                  )}
 
-                        if (displaySlots.length === 0) {
-                          return (
-                            <div className="p-3 text-xs bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-600 dark:text-amber-400 font-semibold leading-relaxed">
-                              No remaining slots for today. Please select a future date or join the waitlist.
+                  {/* Step 2: Select Date & Time */}
+                  {bookingStep === 2 && (
+                    <div className="space-y-6 animate-fade-in">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">Preferred Date</label>
+                          <input 
+                            type="date"
+                            required
+                            min={new Date().toLocaleDateString('en-CA')}
+                            value={selectedDate}
+                            onChange={(e) => setSelectedDate(e.target.value)}
+                            className="w-full bg-slate-50 dark:bg-[#12111a] border border-slate-200 dark:border-white/10 rounded-xl py-3 px-3 text-slate-800 dark:text-white focus:outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">Available Time Slots</label>
+                          {!selectedDate ? (
+                            <div className="py-3.5 px-4 text-xs bg-slate-50 dark:bg-white/5 border dark:border-white/10 text-slate-400 rounded-xl italic">
+                              Please select a preferred date first...
                             </div>
-                          );
-                        }
+                          ) : slotsLoading ? (
+                            <div className="py-3 px-4 text-xs text-blue-500 font-semibold flex items-center gap-2">
+                              <div className="h-4 w-4 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+                              Checking live schedules...
+                            </div>
+                          ) : (() => {
+                            const todayLocal = new Date().toLocaleDateString('en-CA');
+                            const displaySlots = selectedDate === todayLocal
+                              ? availableSlots.filter(slot => {
+                                  const [h, m] = slot.split(':').map(Number);
+                                  const slotTime = new Date();
+                                  slotTime.setHours(h, m, 0, 0);
+                                  return slotTime.getTime() > Date.now() + 15 * 60 * 1000;
+                                })
+                              : availableSlots;
 
-                        return (
-                          <div className="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto pr-1">
-                            {displaySlots.map(slot => (
-                              <button
-                                key={slot}
-                                type="button"
-                                onClick={() => setSelectedTime(slot)}
-                                className={`py-2.5 px-3 text-xs font-bold rounded-xl border transition-all ${
-                                  selectedTime === slot 
-                                    ? 'bg-blue-600 border-blue-600 text-white shadow-md' 
-                                    : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/10'
-                                }`}
-                              >
-                                {slot}
-                              </button>
-                            ))}
-                          </div>
-                        );
-                      })()}
+                            if (displaySlots.length === 0) {
+                              return (
+                                <div className="p-3 text-xs bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-600 dark:text-amber-400 font-semibold leading-relaxed">
+                                  No remaining slots for today. Please select a future date or join the waitlist.
+                                </div>
+                              );
+                            }
+
+                            return (
+                              <div className="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto pr-1">
+                                {displaySlots.map(slot => (
+                                  <button
+                                    key={slot}
+                                    type="button"
+                                    onClick={() => setSelectedTime(slot)}
+                                    className={`py-2.5 px-3 text-xs font-bold rounded-xl border transition-all ${
+                                      selectedTime === slot 
+                                        ? 'bg-blue-600 border-blue-600 text-white shadow-md' 
+                                        : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/10'
+                                    }`}
+                                  >
+                                    {slot}
+                                  </button>
+                                ))}
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setBookingStep(1)}
+                          className="px-6 py-3.5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-bold rounded-xl text-xs"
+                        >
+                          Back
+                        </button>
+                        <button
+                          type="button"
+                          disabled={!selectedDate || !selectedTime}
+                          onClick={() => setBookingStep(3)}
+                          className="flex-1 py-3.5 rounded-xl bg-blue-600 dark:bg-blue-500 text-white dark:text-slate-950 font-bold shadow hover:bg-blue-700 dark:hover:bg-blue-400 transition-all disabled:opacity-50"
+                        >
+                          Continue to Confirm
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
-                  {/* Notes */}
-                  <div>
-                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">Booking Notes / Requests</label>
-                    <textarea 
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      rows={3}
-                      placeholder="Add any specific requests..."
-                      className="w-full bg-slate-50 dark:bg-[#12111a] border border-slate-200 dark:border-white/10 rounded-xl py-3 px-3 text-slate-800 dark:text-white focus:outline-none"
-                    />
-                  </div>
+                  {/* Step 3: Confirmation Summary */}
+                  {bookingStep === 3 && (
+                    <div className="space-y-6 animate-fade-in">
+                      {/* Detailed Summary Card */}
+                      <div className="p-5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200/50 dark:border-white/5 space-y-3 text-xs text-slate-700 dark:text-slate-300">
+                        <span className="text-[10px] uppercase font-bold text-blue-500 tracking-wider">Booking Overview</span>
+                        <div className="space-y-2">
+                          <p className="text-sm font-bold text-slate-800 dark:text-white">
+                            Service: {services.find(s => s.id === selectedService)?.name}
+                          </p>
+                          <p>
+                            Duration: {services.find(s => s.id === selectedService)?.duration} minutes
+                          </p>
+                          <p className="font-bold text-emerald-600 dark:text-emerald-400">
+                            Estimated Price: ₹{services.find(s => s.id === selectedService)?.price}
+                          </p>
+                          <p>
+                            Provider: {selectedEmployee ? employees.find(e => e.id === selectedEmployee)?.name : 'AI Recommended Staff (ワークロード最適化)'}
+                          </p>
+                          <p className="font-semibold text-slate-800 dark:text-white">
+                            Date & Time: {selectedDate} at {selectedTime}
+                          </p>
+                        </div>
+                      </div>
 
-                  <button 
-                    type="submit"
-                    className="w-full py-4 rounded-xl bg-blue-600 dark:bg-blue-500 text-white dark:text-slate-950 font-bold shadow hover:bg-blue-700 dark:hover:bg-blue-400 transition-colors"
-                  >
-                    Confirm Appointment
-                  </button>
+                      {/* Notes / Special Requests */}
+                      <div>
+                        <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">Booking Notes / Requests</label>
+                        <textarea 
+                          value={notes}
+                          onChange={(e) => setNotes(e.target.value)}
+                          rows={3}
+                          placeholder="Add any specific requests..."
+                          className="w-full bg-slate-50 dark:bg-[#12111a] border border-slate-200 dark:border-white/10 rounded-xl py-3 px-3 text-slate-800 dark:text-white focus:outline-none"
+                        />
+                      </div>
+
+                      <div className="flex gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setBookingStep(2)}
+                          className="px-6 py-3.5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-bold rounded-xl text-xs"
+                        >
+                          Back
+                        </button>
+                        <button
+                          type="submit"
+                          className="flex-1 py-3.5 rounded-xl bg-blue-600 dark:bg-blue-500 text-white dark:text-slate-950 font-bold shadow hover:bg-blue-700 dark:hover:bg-blue-400 transition-all"
+                        >
+                          Confirm & Book
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                 </form>
               </div>
@@ -1564,6 +1676,26 @@ export const CustomerDashboard: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* SUCCESS CONFETTI OVERLAY */}
+      {showConfetti && (
+        <div className="fixed inset-0 pointer-events-none z-[200] overflow-hidden">
+          {confettiParticles.map(p => (
+            <div 
+              key={p.id} 
+              className={`absolute top-0 w-2 h-5 ${p.color} rounded-sm animate-fall`} 
+              style={{
+                left: `${p.left}%`,
+                animationDelay: `${p.delay}s`,
+                animationDuration: `${p.duration}s`,
+                width: `${p.size}px`,
+                height: `${p.size * 2}px`,
+                opacity: 0.8
+              }}
+            />
+          ))}
+        </div>
+      )}
 
     </div>
   );

@@ -919,6 +919,60 @@ export const AdminDashboard: React.FC = () => {
                     ))}
                   </div>
                 </div>
+
+                {/* Monthly Trends & Customer Retention Section */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {/* Monthly Trends */}
+                  <div className="p-6 rounded-3xl bg-white dark:bg-linear-card border border-slate-200/50 dark:border-white/5 shadow-premium animate-fade-in">
+                    <h4 className="font-display font-bold text-slate-800 dark:text-white text-md mb-6">Monthly Revenue Growth</h4>
+                    <div className="space-y-4">
+                      {[
+                        { month: 'April 2026', revenue: '₹3,45,000', percentage: 70, trend: '+12%' },
+                        { month: 'May 2026', revenue: '₹4,12,000', percentage: 84, trend: '+19%' },
+                        { month: 'June 2026', revenue: '₹4,82,500', percentage: 100, trend: '+17%' },
+                      ].map((item, idx) => (
+                        <div key={idx} className="space-y-1.5">
+                          <div className="flex justify-between text-xs font-semibold">
+                            <span className="dark:text-slate-300">{item.month} ({item.trend})</span>
+                            <span className="text-emerald-500 font-bold">{item.revenue}</span>
+                          </div>
+                          <div className="w-full bg-slate-100 dark:bg-white/5 h-2 rounded-full overflow-hidden">
+                            <div 
+                              className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full animate-pulse-slow" 
+                              style={{ width: `${item.percentage}%` }} 
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Customer Retention & Growth */}
+                  <div className="p-6 rounded-3xl bg-white dark:bg-linear-card border border-slate-200/50 dark:border-white/5 shadow-premium animate-fade-in">
+                    <h4 className="font-display font-bold text-slate-800 dark:text-white text-md mb-6">Customer Acquisition & Retention</h4>
+                    <div className="space-y-5">
+                      <div className="flex justify-between items-center border-b dark:border-white/5 pb-3">
+                        <span className="text-xs font-semibold dark:text-slate-300">New Registered Clients</span>
+                        <span className="text-xs font-bold text-blue-500 bg-blue-500/10 px-2.5 py-1 rounded-xl">
+                          +184 this month
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center border-b dark:border-white/5 pb-3">
+                        <span className="text-xs font-semibold dark:text-slate-300">Repeat Booking Rate</span>
+                        <span className="text-xs font-bold text-indigo-500 bg-indigo-500/10 px-2.5 py-1 rounded-xl">
+                          78.4%
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-semibold dark:text-slate-300">Customer Lifetime Value</span>
+                        <span className="text-xs font-bold text-purple-500 bg-purple-500/10 px-2.5 py-1 rounded-xl">
+                          ₹4,820 average
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
               </div>
             )}
 

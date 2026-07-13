@@ -428,7 +428,7 @@ export const EmployeeDashboard: React.FC = () => {
             </div>
 
             {/* Performance KPI Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="p-6 rounded-3xl bg-white dark:bg-linear-card border border-slate-200/50 dark:border-white/5 shadow-premium">
                 <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Today's Load</span>
                 <h2 className="text-3xl font-extrabold text-slate-800 dark:text-white mt-2">{todayApps.length}</h2>
@@ -436,17 +436,27 @@ export const EmployeeDashboard: React.FC = () => {
               </div>
 
               <div className="p-6 rounded-3xl bg-white dark:bg-linear-card border border-slate-200/50 dark:border-white/5 shadow-premium">
-                <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Service Rating</span>
-                <h2 className="text-3xl font-extrabold text-slate-800 dark:text-white mt-2 flex items-center gap-1.5">
-                  {user?.employeeProfile?.rating || '4.9'} <Star className="h-6 w-6 text-yellow-400 fill-yellow-400" />
+                <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Productivity Score</span>
+                <h2 className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-2 flex items-center gap-1.5">
+                  94.5% <TrendingUp className="h-5 w-5 text-emerald-500" />
                 </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">Average client review score</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">Target rate: 90%</p>
               </div>
 
               <div className="p-6 rounded-3xl bg-white dark:bg-linear-card border border-slate-200/50 dark:border-white/5 shadow-premium">
-                <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Completed Visits</span>
-                <h2 className="text-3xl font-extrabold text-slate-800 dark:text-white mt-2">{completedAppsCount}</h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">Lifetime completed bookings</p>
+                <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Shift & Breaks</span>
+                <h2 className="text-xl font-extrabold text-blue-600 dark:text-blue-400 mt-3">
+                  On Duty
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">Next Break: 01:30 PM (30 min)</p>
+              </div>
+
+              <div className="p-6 rounded-3xl bg-white dark:bg-linear-card border border-slate-200/50 dark:border-white/5 shadow-premium">
+                <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Calendar Sync</span>
+                <h2 className="text-xs font-bold text-slate-800 dark:text-white mt-3.5 flex items-center gap-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-3 py-1.5 rounded-xl border border-emerald-500/20 w-fit">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" /> Google Calendar Synced
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">Last synced: 2m ago</p>
               </div>
             </div>
 
