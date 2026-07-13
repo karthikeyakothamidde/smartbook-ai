@@ -652,6 +652,34 @@ export const AdminDashboard: React.FC = () => {
                   </motion.div>
                 )}
 
+              {/* Historical Stats KPI Row */}
+              {analytics && (
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 animate-fade-in">
+                  <div className="p-6 rounded-3xl bg-white dark:bg-[#12111a] border border-slate-200/50 dark:border-white/5 shadow-premium">
+                    <span className="text-xs text-slate-400 font-semibold uppercase block">Total Sales</span>
+                    <h3 className="text-2xl font-extrabold text-slate-800 dark:text-white mt-2">₹{analytics.summary.revenue}</h3>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-2">Gross completed earnings</p>
+                  </div>
+                  <div className="p-6 rounded-3xl bg-white dark:bg-[#12111a] border border-slate-200/50 dark:border-white/5 shadow-premium">
+                    <span className="text-xs text-slate-400 font-semibold uppercase block">Fulfillment Rate</span>
+                    <h3 className="text-2xl font-extrabold text-slate-800 dark:text-white mt-2">
+                      {Math.round((appointments.filter(a => a.status === 'COMPLETED').length / (appointments.filter(a => a.status === 'COMPLETED').length + appointments.filter(a => a.status === 'CANCELLED').length || 1)) * 100)}%
+                    </h3>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-2">Completed vs Cancelled</p>
+                  </div>
+                  <div className="p-6 rounded-3xl bg-white dark:bg-[#12111a] border border-slate-200/50 dark:border-white/5 shadow-premium">
+                    <span className="text-xs text-slate-400 font-semibold uppercase block">No-Show Risk</span>
+                    <h3 className="text-2xl font-extrabold text-slate-800 dark:text-white mt-2">{analytics.summary.noShowRate}%</h3>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-2">Missed slots ratio</p>
+                  </div>
+                  <div className="p-6 rounded-3xl bg-white dark:bg-[#12111a] border border-slate-200/50 dark:border-white/5 shadow-premium">
+                    <span className="text-xs text-slate-400 font-semibold uppercase block">Workforce Util.</span>
+                    <h3 className="text-2xl font-extrabold text-slate-800 dark:text-white mt-2">{analytics.summary.employeeUtilization}%</h3>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-2">Active workforce score</p>
+                  </div>
+                </div>
+              )}
+
                 <div className="p-6 rounded-3xl bg-white dark:bg-[#12111a] border border-slate-200/50 dark:border-white/5 shadow-premium">
                   <div className="flex items-center gap-2 mb-6">
                     <CalendarIcon className="h-5 w-5 text-blue-500" />
@@ -684,6 +712,56 @@ export const AdminDashboard: React.FC = () => {
                     />
                   </div>
                 </div>
+
+                {/* Secondary Analytics Split Section */}
+                {analytics && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in">
+                    {/* Left Column: Popular Services */}
+                    <div className="p-6 rounded-3xl bg-white dark:bg-[#12111a] border border-slate-200/50 dark:border-white/5 shadow-premium">
+                      <h4 className="font-display font-bold text-slate-800 dark:text-white text-md mb-4 flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-blue-500" /> Past Service Share Statistics
+                      </h4>
+                      <div className="space-y-4">
+                        {analytics.popularServices.length === 0 ? (
+                          <p className="text-xs text-slate-400 py-6 text-center">No service data loaded.</p>
+                        ) : (
+                          analytics.popularServices.map((item: any, idx: number) => (
+                            <div key={idx} className="flex justify-between items-center text-xs">
+                              <span className="font-semibold text-slate-700 dark:text-slate-300">{item.category}</span>
+                              <span className="bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded font-bold">
+                                {item.bookings} bookings
+                              </span>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Right Column: Staff Performance */}
+                    <div className="p-6 rounded-3xl bg-white dark:bg-[#12111a] border border-slate-200/50 dark:border-white/5 shadow-premium">
+                      <h4 className="font-display font-bold text-slate-800 dark:text-white text-md mb-4 flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-indigo-500" /> Employee Performance Ratings
+                      </h4>
+                      <div className="space-y-3">
+                        {analytics.employeeProductivity.length === 0 ? (
+                          <p className="text-xs text-slate-400 py-6 text-center">No staff performance data loaded.</p>
+                        ) : (
+                          analytics.employeeProductivity.slice(0, 3).map((item: any, idx: number) => (
+                            <div key={idx} className="flex justify-between items-center text-xs pb-2 border-b dark:border-white/5 last:border-0">
+                              <div>
+                                <span className="font-bold text-slate-700 dark:text-white">{item.name}</span>
+                                <span className="text-[10px] text-slate-400 block">Completed: {item.completedAppointments} visits</span>
+                              </div>
+                              <span className="text-xs font-bold text-amber-500 flex items-center gap-1">
+                                ★ {item.rating}
+                              </span>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Appointments Table List */}
                 <div className="mt-8 pt-8 border-t border-slate-200/50 dark:border-white/5 animate-fade-in">
