@@ -71,11 +71,11 @@ export const Login: React.FC = () => {
         
         // Route according to role
         if (data.user.role === 'ADMIN') {
-          navigate('/admin');
+          navigate('/admin', { replace: true });
         } else if (data.user.role === 'EMPLOYEE') {
-          navigate('/employee');
+          navigate('/employee', { replace: true });
         } else {
-          navigate('/customer');
+          navigate('/customer', { replace: true });
         }
       } else {
         setError(data.message || 'Login failed');
@@ -114,7 +114,7 @@ export const Login: React.FC = () => {
       const data = await res.json();
       if (res.ok) {
         login(data.token, data.user);
-        navigate('/customer');
+        navigate('/customer', { replace: true });
       } else {
         setError(data.message || 'Google authentication failed');
       }

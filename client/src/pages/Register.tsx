@@ -65,9 +65,9 @@ export const Register: React.FC = () => {
       if (res.ok) {
         login(data.token, data.user);
         if (data.user.role === 'EMPLOYEE') {
-          navigate('/employee');
+          navigate('/employee', { replace: true });
         } else {
-          navigate('/customer');
+          navigate('/customer', { replace: true });
         }
       } else {
         setError(data.message || 'Registration failed');
