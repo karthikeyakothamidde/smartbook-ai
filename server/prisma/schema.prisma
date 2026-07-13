@@ -87,6 +87,7 @@ model Appointment {
   noShowRisk         String       @default("LOW")     // "LOW", "MEDIUM", "HIGH"
   noShowProbability  Float        @default(0.0)       // probability 0.0 - 1.0
   notes              String?
+  prescription       String?
   pricePaid          Float        @default(0.0)
   paymentStatus      String       @default("PENDING") // "PENDING", "PAID", "REFUNDED"
   createdAt          DateTime     @default(now())

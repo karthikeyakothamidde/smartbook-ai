@@ -72,6 +72,9 @@ export const CustomerDashboard: React.FC = () => {
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
 
+  // Prescription Modal State
+  const [selectedPrescriptionApp, setSelectedPrescriptionApp] = useState<any>(null);
+
   // Toast Alerts
   const [toasts, setToasts] = useState<string[]>([]);
 
@@ -1066,7 +1069,15 @@ export const CustomerDashboard: React.FC = () => {
                                 {app.paymentStatus}
                               </span>
                             </td>
-                            <td className="py-4 text-right space-x-2">
+                            <td className="py-4 text-right space-x-3">
+                              {app.prescription && (
+                                <button 
+                                  onClick={() => setSelectedPrescriptionApp(app)}
+                                  className="text-xs text-emerald-500 font-bold hover:underline"
+                                >
+                                  Prescription
+                                </button>
+                              )}
                               {app.paymentStatus === 'PAID' && (
                                 <button 
                                   onClick={() => viewInvoiceReceipt(app.id)}
@@ -1434,6 +1445,104 @@ export const CustomerDashboard: React.FC = () => {
                   Submit Review
                 </button>
               </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ONLINE PRESCRIPTION PAD POPUP */}
+      <AnimatePresence>
+        {selectedPrescriptionApp && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          >
+            <motion.div 
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              className="w-full max-w-lg rounded-3xl bg-white text-slate-800 p-8 shadow-2xl relative border border-slate-100 overflow-hidden flex flex-col"
+            >
+              {/* Prescription Header */}
+              <div className="flex justify-between items-start border-b-2 border-slate-100 pb-5 mb-6">
+                <div>
+                  <h3 className="font-display font-extrabold text-slate-900 text-lg uppercase tracking-wide">
+                    SmartBook AI Clinic
+                  </h3>
+                  <p className="text-[10px] text-slate-400 font-semibold tracking-widest uppercase">
+                    Digital Appointment & Treatment Network
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className="text-2xl font-bold font-serif text-blue-500">Rx</span>
+                </div>
+              </div>
+
+              {/* Patient and Doctor metadata details */}
+              <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl text-xs border border-slate-100 mb-6">
+                <div>
+                  <span className="text-[10px] text-slate-400 uppercase font-bold block mb-0.5">Patient Name</span>
+                  <span className="font-bold text-slate-800">{user.name}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 uppercase font-bold block mb-0.5">Prescribed By</span>
+                  <span className="font-bold text-slate-800">{selectedPrescriptionApp.employee.user.name}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 uppercase font-bold block mb-0.5">Service Received</span>
+                  <span className="font-bold text-slate-800">{selectedPrescriptionApp.service.name}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 uppercase font-bold block mb-0.5">Date of Issue</span>
+                  <span className="font-bold text-slate-800">
+                    {new Date(selectedPrescriptionApp.startTime).toLocaleDateString(undefined, {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </span>
+                </div>
+              </div>
+
+              {/* Prescription Body content */}
+              <div className="flex-1 min-h-[150px] border-b-2 border-slate-100 pb-6 mb-6">
+                <span className="text-[10px] text-slate-400 uppercase font-bold block tracking-wider mb-3">
+                  Directions & Prescribed Items
+                </span>
+                <div className="bg-slate-50/50 p-5 rounded-2xl border border-dashed border-slate-200 min-h-[120px] flex flex-col justify-between">
+                  <p className="text-sm text-slate-700 font-serif italic whitespace-pre-wrap leading-relaxed">
+                    {selectedPrescriptionApp.prescription}
+                  </p>
+                  {selectedPrescriptionApp.notes && (
+                    <div className="mt-4 pt-4 border-t border-slate-200/50">
+                      <span className="text-[9px] text-slate-400 uppercase font-bold block mb-1">
+                        Doctor Treatment Notes:
+                      </span>
+                      <p className="text-xs text-slate-500 italic">
+                        "{selectedPrescriptionApp.notes}"
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Modal footer actions */}
+              <div className="flex gap-3 justify-end">
+                <button 
+                  onClick={() => window.print()}
+                  className="py-3 px-5 border border-slate-200 rounded-xl hover:bg-slate-50 text-xs font-bold text-slate-500 transition-all flex items-center gap-1.5"
+                >
+                  <Printer className="h-4 w-4" /> Print Copy
+                </button>
+                <button 
+                  onClick={() => setSelectedPrescriptionApp(null)}
+                  className="py-3 px-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-md"
+                >
+                  Close
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}

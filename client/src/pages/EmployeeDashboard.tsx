@@ -57,6 +57,7 @@ export const EmployeeDashboard: React.FC = () => {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [customerHistory, setCustomerHistory] = useState<any[]>([]);
   const [notesInput, setNotesInput] = useState('');
+  const [prescriptionInput, setPrescriptionInput] = useState('');
 
   const fetchCustomerHistory = async (customerId: string) => {
     setHistoryLoading(true);
@@ -85,11 +86,11 @@ export const EmployeeDashboard: React.FC = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ notes: notesInput })
+        body: JSON.stringify({ notes: notesInput, prescription: prescriptionInput })
       });
 
       if (res.ok) {
-        showToast("Visit notes saved successfully!");
+        showToast("Visit details and prescription saved successfully!");
         fetchEmployeeData(false); // Silent refresh
         setSelectedAppForNotes(null);
       } else {
@@ -485,6 +486,7 @@ export const EmployeeDashboard: React.FC = () => {
                               onClick={() => {
                                 setSelectedAppForNotes(app);
                                 setNotesInput(app.notes || '');
+                                setPrescriptionInput(app.prescription || '');
                                 fetchCustomerHistory(app.customerId);
                               }}
                               className="mt-3 text-xs font-bold text-blue-500 hover:text-blue-600 transition-colors flex items-center gap-1.5 bg-blue-50 dark:bg-blue-500/10 px-3 py-1.5 rounded-lg border border-blue-100 dark:border-blue-500/20"
@@ -547,6 +549,7 @@ export const EmployeeDashboard: React.FC = () => {
                                   onClick={() => {
                                     setSelectedAppForNotes(app);
                                     setNotesInput(app.notes || '');
+                                    setPrescriptionInput(app.prescription || '');
                                     fetchCustomerHistory(app.customerId);
                                   }}
                                   className="text-xs font-bold text-blue-500 hover:text-blue-600 transition-colors flex items-center gap-1 bg-blue-50 dark:bg-blue-500/10 px-2.5 py-1.5 rounded-lg border border-blue-100 dark:border-blue-500/20 ml-auto w-fit"
@@ -829,8 +832,21 @@ export const EmployeeDashboard: React.FC = () => {
                     <textarea 
                       value={notesInput}
                       onChange={(e) => setNotesInput(e.target.value)}
-                      rows={5}
+                      rows={3}
                       placeholder="Enter problems identified, services performed, or comments on this visit..."
+                      className="w-full bg-slate-50 dark:bg-[#080710] border border-slate-200 dark:border-white/10 rounded-xl py-3 px-3 text-sm text-slate-800 dark:text-white focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">
+                      Prescription / Recommendations
+                    </label>
+                    <textarea 
+                      value={prescriptionInput}
+                      onChange={(e) => setPrescriptionInput(e.target.value)}
+                      rows={3}
+                      placeholder="Enter prescribed medicines, dosages, advice, or home care recommendations..."
                       className="w-full bg-slate-50 dark:bg-[#080710] border border-slate-200 dark:border-white/10 rounded-xl py-3 px-3 text-sm text-slate-800 dark:text-white focus:outline-none"
                     />
                   </div>
@@ -883,6 +899,14 @@ export const EmployeeDashboard: React.FC = () => {
                               {h.notes ? `"${h.notes}"` : 'No treatment notes recorded.'}
                             </p>
                           </div>
+                          {h.prescription && (
+                            <div className="bg-blue-500/5 dark:bg-blue-500/10 p-2.5 rounded-lg border border-blue-500/10 mt-1.5 animate-fade-in">
+                              <span className="text-[9px] uppercase font-bold text-blue-500 dark:text-blue-400 block mb-0.5">Prescription:</span>
+                              <p className="text-xs text-slate-600 dark:text-slate-300 italic">
+                                "{h.prescription}"
+                              </p>
+                            </div>
+                          )}
                         </div>
                       ))
                     )}

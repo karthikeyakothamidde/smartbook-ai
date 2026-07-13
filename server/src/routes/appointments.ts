@@ -675,20 +675,23 @@ router.put('/:id/status', authenticateToken, async (req: AuthenticatedRequest, r
   }
 });
 
-// Update Appointment Notes (Employee / Admin / Customer)
+// Update Appointment Notes & Prescription (Employee / Admin / Customer)
 router.put('/:id/notes', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   const { id } = req.params;
-  const { notes } = req.body;
+  const { notes, prescription } = req.body;
 
   try {
     const appointment = await prisma.appointment.update({
       where: { id },
-      data: { notes }
+      data: { 
+        notes: notes !== undefined ? notes : undefined,
+        prescription: prescription !== undefined ? prescription : undefined
+      }
     });
     return res.json(appointment);
   } catch (error: any) {
-    console.error("Update notes error:", error);
-    return res.status(500).json({ message: 'Failed to update notes: ' + error.message });
+    console.error("Update notes/prescription error:", error);
+    return res.status(500).json({ message: 'Failed to update notes/prescription: ' + error.message });
   }
 });
 
