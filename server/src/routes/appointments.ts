@@ -675,4 +675,45 @@ router.put('/:id/status', authenticateToken, async (req: AuthenticatedRequest, r
   }
 });
 
+// Update Appointment Notes (Employee / Admin / Customer)
+router.put('/:id/notes', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+  const { id } = req.params;
+  const { notes } = req.body;
+
+  try {
+    const appointment = await prisma.appointment.update({
+      where: { id },
+      data: { notes }
+    });
+    return res.json(appointment);
+  } catch (error: any) {
+    console.error("Update notes error:", error);
+    return res.status(500).json({ message: 'Failed to update notes: ' + error.message });
+  }
+});
+
+// Fetch Customer Appointment History (Employee / Admin)
+router.get('/customer/:customerId/history', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+  const { customerId } = req.params;
+
+  try {
+    const history = await prisma.appointment.findMany({
+      where: { customerId },
+      include: {
+        service: true,
+        employee: {
+          include: {
+            user: { select: { name: true } }
+          }
+        }
+      },
+      orderBy: { startTime: 'desc' }
+    });
+    return res.json(history);
+  } catch (error: any) {
+    console.error("Fetch customer history error:", error);
+    return res.status(500).json({ message: 'Failed to fetch customer history: ' + error.message });
+  }
+});
+
 export default router;

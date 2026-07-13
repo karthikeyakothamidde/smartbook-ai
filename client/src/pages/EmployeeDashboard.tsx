@@ -17,7 +17,8 @@ import {
   X,
   Sliders,
   Briefcase,
-  Sparkles
+  Sparkles,
+  ClipboardList
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -50,6 +51,54 @@ export const EmployeeDashboard: React.FC = () => {
 
   // Toast Alerts
   const [toasts, setToasts] = useState<string[]>([]);
+
+  // Notes & History CRM states
+  const [selectedAppForNotes, setSelectedAppForNotes] = useState<any | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [customerHistory, setCustomerHistory] = useState<any[]>([]);
+  const [notesInput, setNotesInput] = useState('');
+
+  const fetchCustomerHistory = async (customerId: string) => {
+    setHistoryLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/appointments/customer/${customerId}/history`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCustomerHistory(data);
+      }
+    } catch (err) {
+      console.error("Error fetching customer history:", err);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  const handleSaveNotes = async () => {
+    if (!selectedAppForNotes) return;
+
+    try {
+      const res = await fetch(`${API_URL}/appointments/${selectedAppForNotes.id}/notes`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ notes: notesInput })
+      });
+
+      if (res.ok) {
+        showToast("Visit notes saved successfully!");
+        fetchEmployeeData(false); // Silent refresh
+        setSelectedAppForNotes(null);
+      } else {
+        showToast("Failed to save notes.");
+      }
+    } catch (err) {
+      showToast("Error connecting to server to save notes.");
+    }
+  };
 
   const API_URL = 'https://smartbook-backend-68tc.onrender.com/api' || 'https://smartbook-backend-68tc.onrender.com/api';
 
@@ -425,8 +474,23 @@ export const EmployeeDashboard: React.FC = () => {
                               {new Date(app.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(app.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
                             <h4 className="font-bold text-slate-800 dark:text-white text-md mt-1">{app.service.name}</h4>
-                            <p className="text-xs text-slate-500 mt-0.5">Customer: {app.customer.name}</p>
-                            {app.notes && <p className="text-xs text-slate-400 italic mt-2">"{app.notes}"</p>}
+                            <p className="text-xs text-slate-500 mt-0.5 font-medium">Customer: {app.customer.name}</p>
+                            {app.notes && (
+                              <div className="mt-1.5 p-2 bg-slate-50 dark:bg-white/5 border dark:border-white/5 rounded-lg">
+                                <span className="text-[9px] uppercase font-bold text-slate-400 block">Visit Notes:</span>
+                                <p className="text-xs text-slate-600 dark:text-slate-300 italic">"{app.notes}"</p>
+                              </div>
+                            )}
+                            <button
+                              onClick={() => {
+                                setSelectedAppForNotes(app);
+                                setNotesInput(app.notes || '');
+                                fetchCustomerHistory(app.customerId);
+                              }}
+                              className="mt-3 text-xs font-bold text-blue-500 hover:text-blue-600 transition-colors flex items-center gap-1.5 bg-blue-50 dark:bg-blue-500/10 px-3 py-1.5 rounded-lg border border-blue-100 dark:border-blue-500/20"
+                            >
+                              <ClipboardList className="h-3.5 w-3.5" /> Notes & CRM History
+                            </button>
                           </div>
                           
                           <div className="text-right">
@@ -461,6 +525,7 @@ export const EmployeeDashboard: React.FC = () => {
                             <th className="pb-3">Date & Time</th>
                             <th className="pb-3">Customer</th>
                             <th className="pb-3">No-Show Prediction</th>
+                            <th className="pb-3 text-right">Actions</th>
                           </tr>
                         </thead>
                         <tbody className="text-sm divide-y divide-slate-100 dark:divide-white/5">
@@ -476,6 +541,18 @@ export const EmployeeDashboard: React.FC = () => {
                                 }`}>
                                   {app.noShowRisk} RISK ({Math.round(app.noShowProbability * 100)}%)
                                 </span>
+                              </td>
+                              <td className="py-3 text-right">
+                                <button
+                                  onClick={() => {
+                                    setSelectedAppForNotes(app);
+                                    setNotesInput(app.notes || '');
+                                    fetchCustomerHistory(app.customerId);
+                                  }}
+                                  className="text-xs font-bold text-blue-500 hover:text-blue-600 transition-colors flex items-center gap-1 bg-blue-50 dark:bg-blue-500/10 px-2.5 py-1.5 rounded-lg border border-blue-100 dark:border-blue-500/20 ml-auto w-fit"
+                                >
+                                  <ClipboardList className="h-3.5 w-3.5" /> Notes & History
+                                </button>
                               </td>
                             </tr>
                           ))}
@@ -703,6 +780,119 @@ export const EmployeeDashboard: React.FC = () => {
           </div>
         )}
       </main>
+
+      {/* Patient History and Notes Modal */}
+      <AnimatePresence>
+        {selectedAppForNotes && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          >
+            <motion.div 
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              className="w-full max-w-4xl bg-white dark:bg-[#12111a] border border-slate-200 dark:border-white/5 rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[85vh]"
+            >
+              {/* Left Column: Active Notes Logging */}
+              <div className="p-6 md:p-8 flex-1 border-r border-slate-100 dark:border-white/5 flex flex-col justify-between overflow-y-auto">
+                <div className="space-y-6">
+                  <div>
+                    <span className="text-xs font-bold text-blue-500 uppercase tracking-widest block mb-1">CRM Lookup</span>
+                    <h3 className="text-xl font-display font-extrabold text-slate-800 dark:text-white">Customer Profile</h3>
+                  </div>
+
+                  {/* Customer details card */}
+                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200/50 dark:border-white/5 space-y-2">
+                    <p className="text-sm font-bold text-slate-800 dark:text-white">{selectedAppForNotes.customer.name}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Email: {selectedAppForNotes.customer.email}</p>
+                    {selectedAppForNotes.customer.phone && (
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Phone: {selectedAppForNotes.customer.phone}</p>
+                    )}
+                    <div className="pt-2">
+                      <span className={`px-2.5 py-0.5 text-[10px] font-extrabold rounded-full ${
+                        customerHistory.length <= 1 
+                          ? 'bg-amber-500/10 text-amber-500 animate-pulse' 
+                          : 'bg-emerald-500/10 text-emerald-500'
+                      }`}>
+                        {customerHistory.length <= 1 ? 'First-Time Client' : `Returning Client (${customerHistory.length - 1} past visits)`}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">
+                      Visit & Treatment Notes
+                    </label>
+                    <textarea 
+                      value={notesInput}
+                      onChange={(e) => setNotesInput(e.target.value)}
+                      rows={5}
+                      placeholder="Enter problems identified, services performed, or comments on this visit..."
+                      className="w-full bg-slate-50 dark:bg-[#080710] border border-slate-200 dark:border-white/10 rounded-xl py-3 px-3 text-sm text-slate-800 dark:text-white focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-6 border-t border-slate-100 dark:border-white/5 mt-6">
+                  <button 
+                    onClick={() => setSelectedAppForNotes(null)}
+                    className="px-5 py-3 rounded-xl border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-bold text-xs"
+                  >
+                    Close
+                  </button>
+                  <button 
+                    onClick={handleSaveNotes}
+                    className="flex-1 py-3 rounded-xl bg-blue-600 dark:bg-blue-500 text-slate-950 font-bold text-xs shadow-md shadow-blue-500/15"
+                  >
+                    Save Visit Details
+                  </button>
+                </div>
+              </div>
+
+              {/* Right Column: Historical Logs Timeline */}
+              <div className="p-6 md:p-8 w-full md:w-96 bg-slate-50/50 dark:bg-[#181722]/40 flex flex-col overflow-y-auto max-h-[50vh] md:max-h-none">
+                <div className="flex items-center gap-2 mb-6">
+                  <ClipboardList className="h-5 w-5 text-indigo-500" />
+                  <h4 className="font-display font-bold text-slate-800 dark:text-white">Past Appointments</h4>
+                </div>
+
+                {historyLoading ? (
+                  <div className="flex-1 flex items-center justify-center py-12">
+                    <div className="h-6 w-6 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
+                  </div>
+                ) : (
+                  <div className="flex-1 space-y-4 pr-1">
+                    {customerHistory.filter(h => h.id !== selectedAppForNotes.id).length === 0 ? (
+                      <div className="text-center py-12 text-slate-400 text-xs">
+                        No prior appointment records found for this client.
+                      </div>
+                    ) : (
+                      customerHistory.filter(h => h.id !== selectedAppForNotes.id).map(h => (
+                        <div key={h.id} className="p-4 rounded-xl bg-white dark:bg-[#12111a] border border-slate-100 dark:border-white/5 shadow-sm space-y-2">
+                          <div className="flex justify-between items-start text-[10px]">
+                            <span className="font-bold text-slate-800 dark:text-slate-300">{h.service.name}</span>
+                            <span className="text-slate-400">{new Date(h.startTime).toLocaleDateString()}</span>
+                          </div>
+                          <p className="text-[10px] text-slate-400">Served by: {h.employee?.user?.name || 'Staff'}</p>
+                          <div className="bg-slate-50 dark:bg-slate-950/40 p-2.5 rounded-lg border border-slate-100/50 dark:border-white/5 mt-1">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Notes:</span>
+                            <p className="text-xs text-slate-600 dark:text-slate-300 italic">
+                              {h.notes ? `"${h.notes}"` : 'No treatment notes recorded.'}
+                            </p>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );
