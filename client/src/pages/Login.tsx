@@ -272,94 +272,51 @@ export const Login: React.FC = () => {
                 <p className="text-xs text-slate-500 mt-1">to continue to SmartBook AI</p>
               </div>
 
-              {!googleCustomEmailInput ? (
-                <div className="space-y-3">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider mb-1">Select an account</span>
-                  
-                  {/* Account list buttons */}
-                  <button 
-                    onClick={() => triggerGoogleAuth('client.johndoe@gmail.com', 'John Doe')}
-                    className="w-full p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center justify-between text-xs font-semibold transition-all"
-                  >
-                    <div className="text-left">
-                      <span className="block text-slate-800 font-bold">John Doe</span>
-                      <span className="text-slate-400 font-medium">client.johndoe@gmail.com</span>
-                    </div>
-                    <span className="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full font-bold">Client</span>
-                  </button>
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (customGoogleEmail) {
+                    const computedName = customGoogleName || customGoogleEmail.split('@')[0];
+                    triggerGoogleAuth(customGoogleEmail, computedName);
+                  }
+                }} 
+                className="space-y-4"
+              >
+                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider mb-1">Enter Google account details</span>
+                
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 block mb-1">Full Name</label>
+                  <input 
+                    type="text"
+                    required
+                    placeholder="e.g. John Doe"
+                    value={customGoogleName}
+                    onChange={(e) => setCustomGoogleName(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-3 text-xs text-slate-800 focus:outline-none"
+                  />
+                </div>
 
-                  <button 
-                    onClick={() => triggerGoogleAuth('customer.sarah@gmail.com', 'Sarah Connor')}
-                    className="w-full p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center justify-between text-xs font-semibold transition-all"
-                  >
-                    <div className="text-left">
-                      <span className="block text-slate-800 font-bold">Sarah Connor</span>
-                      <span className="text-slate-400 font-medium">customer.sarah@gmail.com</span>
-                    </div>
-                    <span className="text-[10px] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full font-bold">Client</span>
-                  </button>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 block mb-1">Email Address</label>
+                  <input 
+                    type="email"
+                    required
+                    placeholder="e.g. client@gmail.com"
+                    value={customGoogleEmail}
+                    onChange={(e) => setCustomGoogleEmail(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-3 text-xs text-slate-800 focus:outline-none"
+                  />
+                </div>
 
+                <div className="flex gap-2 pt-2 text-xs font-bold">
                   <button 
-                    onClick={() => setGoogleCustomEmailInput(true)}
-                    className="w-full p-3.5 rounded-xl border border-dashed border-slate-300 hover:bg-slate-50 flex items-center justify-center text-xs font-bold text-slate-600 transition-all gap-1.5"
+                    type="submit"
+                    className="w-full py-3 bg-[#4285F4] hover:bg-[#357ae8] text-white rounded-xl font-bold transition-all shadow-md shadow-blue-500/10"
                   >
-                    Use another account
+                    Sign In with Google
                   </button>
                 </div>
-              ) : (
-                <form 
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    if (customGoogleEmail) {
-                      const computedName = customGoogleName || customGoogleEmail.split('@')[0];
-                      triggerGoogleAuth(customGoogleEmail, computedName);
-                    }
-                  }} 
-                  className="space-y-4"
-                >
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider mb-1">Enter Google account details</span>
-                  
-                  <div>
-                    <label className="text-[10px] font-bold text-slate-500 block mb-1">Full Name</label>
-                    <input 
-                      type="text"
-                      required
-                      placeholder="e.g. Sarah Connor"
-                      value={customGoogleName}
-                      onChange={(e) => setCustomGoogleName(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-3 text-xs text-slate-800 focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-[10px] font-bold text-slate-500 block mb-1">Email Address</label>
-                    <input 
-                      type="email"
-                      required
-                      placeholder="e.g. client@gmail.com"
-                      value={customGoogleEmail}
-                      onChange={(e) => setCustomGoogleEmail(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-3 text-xs text-slate-800 focus:outline-none"
-                    />
-                  </div>
-
-                  <div className="flex gap-2 pt-2 text-xs font-bold">
-                    <button 
-                      type="button"
-                      onClick={() => setGoogleCustomEmailInput(false)}
-                      className="px-4 py-3 border border-slate-200 text-slate-500 rounded-xl hover:bg-slate-50"
-                    >
-                      Back
-                    </button>
-                    <button 
-                      type="submit"
-                      className="flex-1 py-3 bg-[#4285F4] hover:bg-[#357ae8] text-white rounded-xl font-bold"
-                    >
-                      Sign In with Google
-                    </button>
-                  </div>
-                </form>
-              )}
+              </form>
             </motion.div>
           </motion.div>
         )}
