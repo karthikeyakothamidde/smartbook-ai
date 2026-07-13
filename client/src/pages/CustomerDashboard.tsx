@@ -957,6 +957,7 @@ export const CustomerDashboard: React.FC = () => {
                       <input 
                         type="date"
                         required
+                        min={new Date().toLocaleDateString('en-CA')}
                         value={selectedDate}
                         onChange={(e) => setSelectedDate(e.target.value)}
                         className="w-full bg-slate-50 dark:bg-[#12111a] border border-slate-200 dark:border-white/10 rounded-xl py-3 px-3 text-slate-800 dark:text-white focus:outline-none"
@@ -973,28 +974,44 @@ export const CustomerDashboard: React.FC = () => {
                           <div className="h-4 w-4 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
                           Checking live schedules...
                         </div>
-                      ) : availableSlots.length === 0 ? (
-                        <div className="p-3 text-xs bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 font-semibold leading-relaxed">
-                          No available slots. All slots are fully booked or off-duty.
-                        </div>
-                      ) : (
-                        <div className="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto pr-1">
-                          {availableSlots.map(slot => (
-                            <button
-                              key={slot}
-                              type="button"
-                              onClick={() => setSelectedTime(slot)}
-                              className={`py-2.5 px-3 text-xs font-bold rounded-xl border transition-all ${
-                                selectedTime === slot 
-                                  ? 'bg-blue-600 border-blue-600 text-white shadow-md' 
-                                  : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/10'
-                              }`}
-                            >
-                              {slot}
-                            </button>
-                          ))}
-                        </div>
-                      )}
+                      ) : (() => {
+                        const todayLocal = new Date().toLocaleDateString('en-CA');
+                        const displaySlots = selectedDate === todayLocal
+                          ? availableSlots.filter(slot => {
+                              const [h, m] = slot.split(':').map(Number);
+                              const slotTime = new Date();
+                              slotTime.setHours(h, m, 0, 0);
+                              return slotTime.getTime() > Date.now() + 15 * 60 * 1000; // 15-minute safety buffer
+                            })
+                          : availableSlots;
+
+                        if (displaySlots.length === 0) {
+                          return (
+                            <div className="p-3 text-xs bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-600 dark:text-amber-400 font-semibold leading-relaxed">
+                              No remaining slots for today. Please select a future date or join the waitlist.
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <div className="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto pr-1">
+                            {displaySlots.map(slot => (
+                              <button
+                                key={slot}
+                                type="button"
+                                onClick={() => setSelectedTime(slot)}
+                                className={`py-2.5 px-3 text-xs font-bold rounded-xl border transition-all ${
+                                  selectedTime === slot 
+                                    ? 'bg-blue-600 border-blue-600 text-white shadow-md' 
+                                    : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/10'
+                                }`}
+                              >
+                                {slot}
+                              </button>
+                            ))}
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
 
